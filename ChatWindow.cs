@@ -137,8 +137,10 @@ public class ChatWindow : Form
 
     private void AppendAssistant(string text)
     {
+        _chatLog.SelectionColor = Color.Yellow;
+        _chatLog.AppendText("Assistant: ");
         _chatLog.SelectionColor = Color.FromArgb(129, 199, 132);
-        _chatLog.AppendText($"Assistant: {text}\n\n");
+        _chatLog.AppendText($"{text}\n\n");
         _chatLog.ScrollToCaret();
     }
 

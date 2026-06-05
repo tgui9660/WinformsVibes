@@ -34,8 +34,8 @@ Dark-themed dialog shown when no database connection is available. User enters a
 FixedDialog form with a dark theme that displays application info (name, version, author, framework, database) fetched from the database. User clicks the X to close and proceed.
 
 ### Main Form (`MainForm.cs`)
-Single-form application with:
-- **MenuStrip** — File, Edit, View, Chat, Help menus with keyboard shortcuts (F11 fullscreen, F1 about)
+Extends `MaterialForm` from ReaLTaiizor (Material Design form base). Single-form application with:
+- **MenuStrip** — File, Edit, View, Settings, Chat, Help menus (no keyboard shortcuts wired)
 - **TabControl** — one tab:
   - **World Map** — WebView2 control initialized via `async void InitializeMapAsync` that calls `EnsureCoreWebView2Async` then navigates to Google Maps
 - **StatusStrip** — "Ready" label at bottom, live clock updated by a 1-second `System.Windows.Forms.Timer`
@@ -68,6 +68,7 @@ Created automatically in the output directory (`bin/Debug/net10.0-windows/`) whe
 - `ApplicationInfo` (`Models/ApplicationInfo.cs`) — mapped by `ApplicationInfoMap` (`Maps/ApplicationInfoMap.cs`)
 - `HelpInfo` (`Models/HelpInfo.cs`) — mapped by `HelpInfoMap` (`Maps/HelpInfoMap.cs`)
 - Proxy validation and lazy loading are disabled
+- `ApplicationInfo.DatabaseName` is **not mapped** to the database — set at runtime for display purposes
 
 #### Help Topics (`HelpTopics.xml`)
 XML file (copied to output on build) that defines the help topics seeded into the `HelpInfo` table on database creation. Each `<Topic>` element has `Category` and `Name` attributes and text content. Edit this file to change the help content. On every launch, `SyncHelpTopics()` compares the row count in the HelpInfo table with the number of `<Topic>` elements in the XML. If they differ, the table is truncated and re-seeded from the XML.
