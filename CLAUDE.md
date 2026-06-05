@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-WinformsVibes is a .NET 10.0 Windows Forms desktop application with a splash screen, menu bar, status bar, and tabbed content (embedded Google Maps via WebView2). Application info (name, version, author, framework, database) is fetched from a SQL Server database via Fluent NHibernate and displayed on the splash screen at startup. On first launch (or when the configured database is unavailable), a setup dialog lets the user create and name a new database. Includes a help topics browser, an AI chat window, and an AI help assistant that uses HelpInfo data as context. All connect to a local OpenAI-compatible endpoint (192.168.2.15:8888).
+WinformsVibes is a .NET 10.0 Windows Forms desktop application with a splash screen, menu bar, status bar, and tabbed content (embedded Google Maps via WebView2 with interactive lat/long inputs). Application info is fetched from a SQL Server database via Fluent NHibernate and displayed on the splash screen at startup. On first launch (or when the configured database is unavailable), a setup dialog lets the user create and name a new database. Includes a help topics browser, an AI chat window, an AI help assistant that uses HelpInfo data as context, and an AI map chat window for programmatic queries. All AI windows connect to a local OpenAI-compatible endpoint (192.168.2.15:8888).
 
 ## Build and Run
 
@@ -35,10 +35,11 @@ FixedDialog form with a dark theme that displays application info (name, version
 
 ### Main Form (`MainForm.cs`)
 Extends `MaterialForm` from ReaLTaiizor (Material Design form base). Single-form application with:
-- **MenuStrip** — File, Edit, View, Settings, Chat, Help menus (no keyboard shortcuts wired)
+- **MenuStrip** — File (New, Open, Save, Exit), Edit (Copy, Paste), View (Toggle Fullscreen, About), Settings (Preferences), Chat (AI Chat), Help (Contents, AI Help, About)
 - **TabControl** — one tab:
-  - **World Map** — WebView2 control initialized via `async void InitializeMapAsync` that calls `EnsureCoreWebView2Async` then navigates to Google Maps
+  - **World Map** — WebView2 control loaded with Google Maps. A bottom coordPanel has Lat/Long TextBox inputs and a "Tell Me More!" button. Enter in a coord field navigates the map. The button opens the AIMapWindow and asks the agent about the first city within a 5 mile radius of the coordinates. `SourceChanged` event syncs the URL coordinates back into the Lat/Long inputs. Button is disabled when both coords are 0.
 - **StatusStrip** — "Ready" label at bottom, live clock updated by a 1-second `System.Windows.Forms.Timer`
+- **Icon** — procedurally drawn bear face via `CreateBearIcon()`
 
 ### Help Window (`HelpWindow.cs`)
 Dark-themed window opened via Help > Contents. Groups help topics by unique Category+Topic pairs and displays all content values when selected. Search filters across category, topic name, and all content values. Uses `GroupedHelpTopic` record with a `List<string>` of contents.
@@ -49,17 +50,24 @@ Singleton window opened via Chat > AI Chat. Connects to an OpenAI-compatible end
 ### AI Help Window (`AIHelpWindow.cs`)
 Titled "Fella - AI Helper" with a question mark icon (`SystemIcons.Question`). Opened via Help > AI Help. Same singleton pattern, hides on close, preserves chat history. Uses same font sizes and layout as ChatWindow. Displays a red welcome message: "Welcome to Fella! Your helpful AI dude." Loads all HelpInfo topics from the database at startup and includes them in the system prompt so the AI can answer questions based on actual help content.
 
+### AI Map Window (`AIMapWindow.cs`)
+Singleton chat window titled "AI Map Chat". Same UI pattern as ChatWindow (dark theme, Consolas 15f log, Segoe UI 16.5f input). Exposes `AskAsync(string message)` so other components can send messages programmatically. Assistant responses are green (vs gray in ChatWindow). Wired to the "Tell Me More!" button in the World Map tab — clicking it asks about the first city within a 5 mile radius of the selected coordinates.
+
 ### OpenAI Chat Client (`OpenAIChatClient.cs`)
-Uses `HttpClient` with `System.Text.Json` to call the OpenAI `/chat/completions` endpoint. Takes `apiKey`, `model`, and optional `baseUrl` in the constructor. No external NuGet packages required.
+Uses `HttpClient` with `System.Text.Json` to call the OpenAI `/chat/completions` endpoint. Takes `apiKey`, `model`, and optional `baseUrl` in the constructor. `ChatAsync` accepts an optional `systemPrompt` parameter (defaults to "You are a helpful assistant."). No external NuGet packages required. Implements `IDisposable` to clean up the HttpClient.
 
 ### Database (`DbConfig.cs`)
-Fluent NHibernate config connecting to a local SQL Server. Connection details (server, database name, user, password) are loaded from `dbconfig.json` at startup. If the file is missing, defaults to `localhost`/`winformsvibes`/`sa`/`password`.
+Fluent NHibernate config connecting to a local SQL Server. Connection details are loaded via `DbSettingsManager.Load()` from `dbconfig.json`.
 
 - `CheckConnection()` — tests if the configured database is reachable
-- `CreateAndSeedDatabase(name)` — creates the database, the `ApplicationInfo` and `HelpInfo` tables, seeds `ApplicationInfo` with default app data, and seeds `HelpInfo` from `HelpTopics.xml`
+- `CreateAndSeedDatabase(name, out errorMessage)` — creates the database, the `ApplicationInfo` and `HelpInfo` tables, seeds `ApplicationInfo` with default app data, and seeds `HelpInfo` from `HelpTopics.xml`. Resets `_sessionFactory` so subsequent calls use the new connection.
 - `CurrentDatabaseName` — exposes the active database name for display on the splash screen
+- `GetApplicationInfo()` — queries the single ApplicationInfo row
 - `GetHelpTopics()` — returns a list of `HelpTopic` records for the HelpWindow
 - `SyncHelpTopics()` — compares HelpInfo row count with HelpTopics.xml `<Topic>` count; if they differ, truncates and re-seeds from XML
+
+#### Settings (`DbSettings.cs`)
+`DbSettings` POCO with Server, DatabaseName, UserId, Password properties. `DbSettingsManager` reads/writes `dbconfig.json` from the output directory using `System.Text.Json`. If the file is missing, returns a `DbSettings` with defaults (`localhost`/`winformsvibes`/`sa`/`password`).
 
 #### Config File (`dbconfig.json`)
 Created automatically in the output directory (`bin/Debug/net10.0-windows/`) when the user creates a database via the setup dialog. Storing the connection here means the app remembers the database across launches. Deleting this file triggers the setup dialog on next launch.
@@ -80,7 +88,7 @@ Critical: use `async void` with `await EnsureCoreWebView2Async()` before calling
 Controls must be added in this order: TabControl first, StatusStrip second, MenuStrip last. `MainMenuStrip` is set after all controls are added. DockStyle.Fill on TabControl fills remaining space between menu and status bar.
 
 ### Singleton Windows
-ChatWindow and AIHelpWindow use a static `_instance` field with `GetInstance()`. Clicking X calls `Hide()` instead of closing, preserving the singleton and full chat history.
+ChatWindow, AIHelpWindow, and AIMapWindow use a static `_instance` field with `GetInstance()`. Clicking X calls `Hide()` instead of closing, preserving the singleton and full chat history.
 
 ## Dependencies
 
