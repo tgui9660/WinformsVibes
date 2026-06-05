@@ -35,7 +35,7 @@ FixedDialog form with a dark theme that displays application info (name, version
 
 ### Main Form (`MainForm.cs`)
 Single-form application with:
-- **MenuStrip** — File, Edit, View, Settings, Help menus with keyboard shortcuts (F11 fullscreen, F1 about)
+- **MenuStrip** — File, Edit, View, Chat, Help menus with keyboard shortcuts (F11 fullscreen, F1 about)
 - **TabControl** — one tab:
   - **World Map** — WebView2 control initialized via `async void InitializeMapAsync` that calls `EnsureCoreWebView2Async` then navigates to Google Maps
 - **StatusStrip** — "Ready" label at bottom, live clock updated by a 1-second `System.Windows.Forms.Timer`
@@ -44,7 +44,10 @@ Single-form application with:
 Dark-themed window opened via Help > Contents. Lists help topics from the database in a ListView on the left; clicking a topic displays its content in a RichTextBox on the right. Includes a search box to filter topics by category, name, or content.
 
 ### AI Chat Window (`ChatWindow.cs`)
-Singleton window opened via Help > Chat. Connects to an OpenAI-compatible endpoint at `http://192.168.2.15:8888/v1` using the `OpenAIChatClient`. API key (`"apikey"`) and model (`"Qwen3.6-27B-MTP-Q4_K_M"`) are hardcoded. Clicking X hides the window rather than closing it, preserving chat history across open/close cycles.
+Singleton window opened via Chat > AI Chat. Connects to an OpenAI-compatible endpoint at `http://192.168.2.15:8888/v1` using the `OpenAIChatClient`. API key (`"apikey"`) and model (`"Qwen3.6-27B-MTP-Q4_K_M"`) are hardcoded. Clicking X hides the window rather than closing it, preserving chat history across open/close cycles. User messages are displayed in blue and retain formatting via RTF preservation when removing the "Thinking..." placeholder.
+
+### AI Help Window (`AIHelpWindow.cs`)
+Copy of ChatWindow with title "AI Help". Opened via Help > AI Help. Same singleton pattern, hides on close, preserves chat history.
 
 ### OpenAI Chat Client (`OpenAIChatClient.cs`)
 Uses `HttpClient` with `System.Text.Json` to call the OpenAI `/chat/completions` endpoint. Takes `apiKey`, `model`, and optional `baseUrl` in the constructor. No external NuGet packages required.
@@ -55,6 +58,7 @@ Fluent NHibernate config connecting to a local SQL Server. Connection details (s
 - `CheckConnection()` — tests if the configured database is reachable
 - `CreateAndSeedDatabase(name)` — creates the database, the `ApplicationInfo` and `HelpInfo` tables, seeds `ApplicationInfo` with default app data, and seeds `HelpInfo` from `HelpTopics.xml`
 - `CurrentDatabaseName` — exposes the active database name for display on the splash screen
+- `GetHelpTopics()` — returns a list of `HelpTopic` records for the HelpWindow
 
 #### Config File (`dbconfig.json`)
 Created automatically in the output directory (`bin/Debug/net10.0-windows/`) when the user creates a database via the setup dialog. Storing the connection here means the app remembers the database across launches. Deleting this file triggers the setup dialog on next launch.
@@ -72,6 +76,9 @@ Critical: use `async void` with `await EnsureCoreWebView2Async()` before calling
 
 ### Layout Order
 Controls must be added in this order: TabControl first, StatusStrip second, MenuStrip last. `MainMenuStrip` is set after all controls are added. DockStyle.Fill on TabControl fills remaining space between menu and status bar.
+
+### Singleton Windows
+ChatWindow and AIHelpWindow use a static `_instance` field with `GetInstance()`. Clicking X calls `Hide()` instead of closing, preserving the singleton and full chat history.
 
 ## Dependencies
 

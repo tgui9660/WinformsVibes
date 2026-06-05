@@ -56,13 +56,18 @@ namespace WinformsVibes
                 new ToolStripMenuItem("&Preferences...", null, (_, _) => MessageBox.Show("Preferences not implemented.", Text, MessageBoxButtons.OK, MessageBoxIcon.Information)),
             }});
 
+            // Chat
+            _menuStrip.Items.Add(new ToolStripMenuItem("&Chat") { DropDownItems = {
+                new ToolStripMenuItem("AI Chat", null, (_, _) => ChatWindow.GetInstance().Show()),
+            }});
+
             // Help
             var helpMenu = new ToolStripMenuItem("&Help");
             var helpAboutItem = new ToolStripMenuItem("&About");
             helpAboutItem.Click += (_, _) => ShowAboutDialog();
             helpMenu.DropDownItems.AddRange(new ToolStripItem[] {
                 new ToolStripMenuItem("&Contents", null, (_, _) => new HelpWindow().Show()),
-                new ToolStripMenuItem("C&hat", null, (_, _) => ChatWindow.GetInstance().Show()),
+                new ToolStripMenuItem("AI &Help", null, (_, _) => AIHelpWindow.GetInstance().Show()),
                 new ToolStripSeparator(),
                 helpAboutItem,
             });

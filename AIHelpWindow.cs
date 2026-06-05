@@ -3,29 +3,29 @@ using System.Windows.Forms;
 
 namespace WinformsVibes;
 
-public class ChatWindow : Form
+public class AIHelpWindow : Form
 {
     private const string ApiKey = "apikey";
     private const string Model = "Qwen3.6-27B-MTP-Q4_K_M";
 
-    private static ChatWindow? _instance;
+    private static AIHelpWindow? _instance;
 
     private readonly RichTextBox _chatLog;
     private readonly TextBox _inputBox;
     private readonly Button _sendButton;
     private readonly OpenAIChatClient _client;
 
-    public static ChatWindow GetInstance()
+    public static AIHelpWindow GetInstance()
     {
-        _instance ??= new ChatWindow();
+        _instance ??= new AIHelpWindow();
         _instance.BringToFront();
         return _instance;
     }
 
-    private ChatWindow()
+    private AIHelpWindow()
     {
         StartPosition = FormStartPosition.CenterScreen;
-        Text = "AI Chat";
+        Text = "AI Help";
         Size = new Size(700, 550);
         MinimumSize = new Size(500, 400);
         BackColor = Color.FromArgb(30, 30, 46);
