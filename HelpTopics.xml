@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<HelpTopics>
+  <Topic Category="Project Structure" Name="Solution Layout">
+    The project is a single .NET 10.0 Windows Forms application. Source files live alongside the .csproj. Models are under Models/, Fluent NHibernate maps are under Maps/, and the main entry point is Program.cs.
+  </Topic>
+  <Topic Category="Project Structure" Name="Database Layer">
+    Database access is handled by Fluent NHibernate with SQL Server as the backend. DbConfig.cs configures the session factory and connection. A JSON config file (dbconfig.json) stores the active database name and connection details.
+  </Topic>
+  <Topic Category="Project Structure" Name="Dependencies">
+    Microsoft.Web.WebView2 — embeds Chromium-based web content inside WinForms. FluentNHibernate — fluent mappings for NHibernate. ReaLTaiizor — Material Design controls for WinForms. System.Data.SqlClient — SQL Server data access.
+  </Topic>
+  <Topic Category="GUI Features" Name="Splash Screen">
+    Shown at startup. Displays application info (name, version, author, framework, database, dependencies) fetched from the database. Click the close button (X) to dismiss and proceed to the main form.
+  </Topic>
+  <Topic Category="GUI Features" Name="Main Form">
+    Single-form application with a MenuStrip (File, Edit, View, Settings, Help), a StatusStrip with a live clock, and a TabControl. The World Map tab embeds a WebView2 control that loads Google Maps.
+  </Topic>
+  <Topic Category="GUI Features" Name="Menu Bar">
+    File — New, Open, Save, Exit. Edit — Copy, Paste. View — Toggle Fullscreen (F11), About. Settings — Preferences. Help — Contents, About (F1).
+  </Topic>
+  <Topic Category="GUI Features" Name="Status Bar">
+    Displayed at the bottom of the main form. Shows a "Ready" label on the left and a live-updating clock (refreshes every second) on the right.
+  </Topic>
+  <Topic Category="How to Use" Name="First Launch">
+    On first launch (or when the configured database is unavailable), a Database Setup dialog appears. Enter a database name and click Create. The app creates the database, tables, and seed data automatically.
+  </Topic>
+  <Topic Category="How to Use" Name="Running the Application">
+    Double-click RunMe.bat to launch, or run "dotnet run --project WinformsVibes.csproj" from a terminal. You can also build with "dotnet build" and run the compiled exe directly from bin/Debug/net10.0-windows/.
+  </Topic>
+  <Topic Category="How to Use" Name="Switching Databases">
+    The active database is stored in dbconfig.json (next to the exe). Edit the "DatabaseName" field to switch, or delete the file to trigger the setup dialog again on next launch.
+  </Topic>
+  <Topic Category="How to Use" Name="Browsing Help Topics">
+    Help topics are stored in the HelpInfo table and can be browsed from the Help menu. Select a topic to view its content in a dialog.
+  </Topic>
+</HelpTopics>

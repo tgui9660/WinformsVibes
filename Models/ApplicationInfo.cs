@@ -11,4 +11,7 @@ public class ApplicationInfo
     public virtual string? Dependencies { get; set; }
     public virtual DateTime CreatedAt { get; set; }
     public virtual DateTime UpdatedAt { get; set; }
+
+    // Not mapped — set at runtime for display purposes
+    public string DatabaseName { get; set; } = string.Empty;
 }

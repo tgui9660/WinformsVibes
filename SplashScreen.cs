@@ -13,7 +13,7 @@ public class SplashScreen : Form
         this.MaximizeBox = false;
         this.MinimizeBox = false;
         this.BackColor = Color.FromArgb(30, 30, 46);
-        this.Size = new Size(420, 300);
+        this.Size = new Size(420, 350);
         this.DoubleBuffered = true;
 
         var panel = new Panel
@@ -62,12 +62,22 @@ public class SplashScreen : Form
             AutoSize = false,
         };
 
+        var database = new Label
+        {
+            Text = $"Database: {info.DatabaseName}",
+            Font = new Font("Segoe UI", 10f),
+            ForeColor = Color.LightGray,
+            Location = new Point(20, 155),
+            Size = new Size(380, 20),
+            AutoSize = false,
+        };
+
         var separator = new Label
         {
             Text = new string('─', 58),
             Font = new Font("Segoe UI", 8f),
             ForeColor = Color.FromArgb(70, 70, 90),
-            Location = new Point(20, 155),
+            Location = new Point(20, 180),
             Size = new Size(380, 15),
             AutoSize = false,
         };
@@ -77,7 +87,7 @@ public class SplashScreen : Form
             Text = "Dependencies:",
             Font = new Font("Segoe UI", 9f, FontStyle.Bold),
             ForeColor = Color.Gray,
-            Location = new Point(20, 175),
+            Location = new Point(20, 205),
             Size = new Size(380, 20),
             AutoSize = false,
         };
@@ -88,7 +98,7 @@ public class SplashScreen : Form
             Font = new Font("Consolas", 9f),
             ForeColor = Color.FromArgb(140, 140, 160),
             BackColor = Color.FromArgb(30, 30, 46),
-            Location = new Point(20, 195),
+            Location = new Point(20, 225),
             Size = new Size(380, 50),
             Multiline = true,
             ReadOnly = true,
@@ -105,7 +115,7 @@ public class SplashScreen : Form
             AutoSize = false,
         };
 
-        panel.Controls.AddRange(new Control[] { title, version, author, framework, separator, depsLabel, deps, loading });
+        panel.Controls.AddRange(new Control[] { title, version, author, framework, database, separator, depsLabel, deps, loading });
         this.Controls.Add(panel);
 
         this.Text = info.ApplicationName;
