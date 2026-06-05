@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-WinformsVibes is a .NET 10.0 Windows Forms desktop application with a splash screen, menu bar, status bar, and tabbed content (embedded Google Maps via WebView2). Application info (name, version, author, dependencies) is fetched from a SQL Server database via Fluent NHibernate and displayed on the splash screen at startup. On first launch (or when the configured database is unavailable), a setup dialog lets the user create and name a new database.
+WinformsVibes is a .NET 10.0 Windows Forms desktop application with a splash screen, menu bar, status bar, and tabbed content (embedded Google Maps via WebView2). Application info (name, version, author, dependencies) is fetched from a SQL Server database via Fluent NHibernate and displayed on the splash screen at startup. On first launch (or when the configured database is unavailable), a setup dialog lets the user create and name a new database. Includes a help topics browser and an AI chat window that connects to a local OpenAI-compatible endpoint (192.168.2.15:8888).
 
 ## Build and Run
 
@@ -39,6 +39,15 @@ Single-form application with:
 - **TabControl** — one tab:
   - **World Map** — WebView2 control initialized via `async void InitializeMapAsync` that calls `EnsureCoreWebView2Async` then navigates to Google Maps
 - **StatusStrip** — "Ready" label at bottom, live clock updated by a 1-second `System.Windows.Forms.Timer`
+
+### Help Window (`HelpWindow.cs`)
+Dark-themed window opened via Help > Contents. Lists help topics from the database in a ListView on the left; clicking a topic displays its content in a RichTextBox on the right. Includes a search box to filter topics by category, name, or content.
+
+### AI Chat Window (`ChatWindow.cs`)
+Singleton window opened via Help > Chat. Connects to an OpenAI-compatible endpoint at `http://192.168.2.15:8888/v1` using the `OpenAIChatClient`. API key (`"apikey"`) and model (`"Qwen3.6-27B-MTP-Q4_K_M"`) are hardcoded. Clicking X hides the window rather than closing it, preserving chat history across open/close cycles.
+
+### OpenAI Chat Client (`OpenAIChatClient.cs`)
+Uses `HttpClient` with `System.Text.Json` to call the OpenAI `/chat/completions` endpoint. Takes `apiKey`, `model`, and optional `baseUrl` in the constructor. No external NuGet packages required.
 
 ### Database (`DbConfig.cs`)
 Fluent NHibernate config connecting to a local SQL Server. Connection details (server, database name, user, password) are loaded from `dbconfig.json` at startup. If the file is missing, defaults to `localhost`/`winformsvibes`/`sa`/`password`.

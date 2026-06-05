@@ -61,7 +61,8 @@ namespace WinformsVibes
             var helpAboutItem = new ToolStripMenuItem("&About");
             helpAboutItem.Click += (_, _) => ShowAboutDialog();
             helpMenu.DropDownItems.AddRange(new ToolStripItem[] {
-                new ToolStripMenuItem("&Contents", null, (_, _) => MessageBox.Show("Help not implemented.", Text, MessageBoxButtons.OK, MessageBoxIcon.Information)),
+                new ToolStripMenuItem("&Contents", null, (_, _) => new HelpWindow().Show()),
+                new ToolStripMenuItem("C&hat", null, (_, _) => ChatWindow.GetInstance().Show()),
                 new ToolStripSeparator(),
                 helpAboutItem,
             });

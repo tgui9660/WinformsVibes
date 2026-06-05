@@ -54,6 +54,15 @@ public static class DbConfig
         return session.CreateCriteria<ApplicationInfo>().UniqueResult<ApplicationInfo?>();
     }
 
+    public static List<HelpTopic> GetHelpTopics()
+    {
+        using var session = SessionFactory.OpenSession();
+        return session.CreateCriteria<Models.HelpInfo>()
+            .List<Models.HelpInfo>()
+            .Select(h => new HelpTopic(h.Category, h.Topic, h.Content))
+            .ToList();
+    }
+
     public static bool CreateAndSeedDatabase(string databaseName, out string errorMessage)
     {
         try
