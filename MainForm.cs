@@ -3,14 +3,15 @@ using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Web.WebView2.WinForms;
+using ReaLTaiizor.Forms;
 
 namespace WinformsVibes
 {
-    class MainForm : Form
+    class MainForm : MaterialForm
     {
         private MenuStrip _menuStrip;
-        private ToolStripStatusLabel _statusLabel;
         private StatusStrip _statusStrip;
+        private ToolStripStatusLabel _statusLabel;
 
         public MainForm()
         {
@@ -40,18 +41,12 @@ namespace WinformsVibes
 
             // View
             var viewMenu = new ToolStripMenuItem("&View");
-            var fullscreenItem = new ToolStripMenuItem("T&oggle Fullscreen")
-            {
-                ShortcutKeys = Keys.F11,
-            };
+            var fullscreenItem = new ToolStripMenuItem("T&oggle Fullscreen");
             fullscreenItem.Click += (_, _) =>
             {
                 WindowState = WindowState == FormWindowState.Maximized ? FormWindowState.Normal : FormWindowState.Maximized;
             };
-            var viewAboutItem = new ToolStripMenuItem("&About")
-            {
-                ShortcutKeys = Keys.F1,
-            };
+            var viewAboutItem = new ToolStripMenuItem("&About");
             viewAboutItem.Click += (_, _) => ShowAboutDialog();
             viewMenu.DropDownItems.AddRange(new ToolStripItem[] { fullscreenItem, viewAboutItem });
             _menuStrip.Items.Add(viewMenu);
@@ -63,10 +58,7 @@ namespace WinformsVibes
 
             // Help
             var helpMenu = new ToolStripMenuItem("&Help");
-            var helpAboutItem = new ToolStripMenuItem("&About")
-            {
-                ShortcutKeys = Keys.F1,
-            };
+            var helpAboutItem = new ToolStripMenuItem("&About");
             helpAboutItem.Click += (_, _) => ShowAboutDialog();
             helpMenu.DropDownItems.AddRange(new ToolStripItem[] {
                 new ToolStripMenuItem("&Contents", null, (_, _) => MessageBox.Show("Help not implemented.", Text, MessageBoxButtons.OK, MessageBoxIcon.Information)),
@@ -89,7 +81,7 @@ namespace WinformsVibes
             var tab = new TabControl { Dock = DockStyle.Fill };
 
             // Google Maps World View
-            var mapTab = new TabPage("World Map");
+            var mapTab = new System.Windows.Forms.TabPage("World Map");
             var webView = new WebView2 { Dock = DockStyle.Fill };
             mapTab.Controls.Add(webView);
             InitializeMapAsync(webView);
@@ -133,32 +125,21 @@ namespace WinformsVibes
             var darkBrown = Color.FromArgb(80, 50, 20);
             var lightBrown = Color.FromArgb(180, 130, 80);
 
-            // Ears
             g.FillEllipse(new SolidBrush(brown), 2, 4, 10, 10);
             g.FillEllipse(new SolidBrush(brown), 20, 4, 10, 10);
             g.FillEllipse(new SolidBrush(lightBrown), 4, 6, 6, 6);
             g.FillEllipse(new SolidBrush(lightBrown), 22, 6, 6, 6);
-
-            // Head
             g.FillEllipse(new SolidBrush(brown), 4, 8, 24, 20);
-
-            // Snout
             g.FillEllipse(new SolidBrush(lightBrown), 10, 16, 12, 10);
-
-            // Nose
             g.FillEllipse(new SolidBrush(darkBrown), 14, 16, 4, 3);
 
-            // Mouth (simple curve)
             using var pen = new Pen(darkBrown, 1);
             var mouthPath = new System.Drawing.Drawing2D.GraphicsPath();
             mouthPath.AddArc(13, 19, 6, 4, 0, 180);
             g.DrawPath(pen, mouthPath);
 
-            // Eyes
             g.FillEllipse(new SolidBrush(darkBrown), 9, 12, 3, 3);
             g.FillEllipse(new SolidBrush(darkBrown), 20, 12, 3, 3);
-
-            // Eye highlights
             g.FillEllipse(new SolidBrush(Color.White), 10, 12, 1, 1);
             g.FillEllipse(new SolidBrush(Color.White), 21, 12, 1, 1);
 
