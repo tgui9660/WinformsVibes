@@ -16,6 +16,7 @@ namespace WinformsVibes
         {
             Text = "Winforms Vibes";
             WindowState = FormWindowState.Maximized;
+            Icon = CreateBearIcon();
 
             // Menu bar
             _menuStrip = new MenuStrip { Dock = DockStyle.Top };
@@ -120,6 +121,48 @@ namespace WinformsVibes
         {
             await webView.EnsureCoreWebView2Async();
             webView.CoreWebView2.Navigate("https://www.google.com/maps/@0,0,2z");
+        }
+
+        private static Icon CreateBearIcon()
+        {
+            using var bmp = new Bitmap(32, 32);
+            using var g = Graphics.FromImage(bmp);
+            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+
+            var brown = Color.FromArgb(139, 90, 43);
+            var darkBrown = Color.FromArgb(80, 50, 20);
+            var lightBrown = Color.FromArgb(180, 130, 80);
+
+            // Ears
+            g.FillEllipse(new SolidBrush(brown), 2, 4, 10, 10);
+            g.FillEllipse(new SolidBrush(brown), 20, 4, 10, 10);
+            g.FillEllipse(new SolidBrush(lightBrown), 4, 6, 6, 6);
+            g.FillEllipse(new SolidBrush(lightBrown), 22, 6, 6, 6);
+
+            // Head
+            g.FillEllipse(new SolidBrush(brown), 4, 8, 24, 20);
+
+            // Snout
+            g.FillEllipse(new SolidBrush(lightBrown), 10, 16, 12, 10);
+
+            // Nose
+            g.FillEllipse(new SolidBrush(darkBrown), 14, 16, 4, 3);
+
+            // Mouth (simple curve)
+            using var pen = new Pen(darkBrown, 1);
+            var mouthPath = new System.Drawing.Drawing2D.GraphicsPath();
+            mouthPath.AddArc(13, 19, 6, 4, 0, 180);
+            g.DrawPath(pen, mouthPath);
+
+            // Eyes
+            g.FillEllipse(new SolidBrush(darkBrown), 9, 12, 3, 3);
+            g.FillEllipse(new SolidBrush(darkBrown), 20, 12, 3, 3);
+
+            // Eye highlights
+            g.FillEllipse(new SolidBrush(Color.White), 10, 12, 1, 1);
+            g.FillEllipse(new SolidBrush(Color.White), 21, 12, 1, 1);
+
+            return Icon.FromHandle(bmp.GetHicon());
         }
     }
 }
