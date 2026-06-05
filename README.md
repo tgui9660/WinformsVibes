@@ -13,7 +13,7 @@ A Windows Forms desktop application built with .NET 10.0, featuring a splash scr
 - **Database Setup** — first-run wizard that creates and configures a SQL Server database automatically
 - **Help Topics** — browsable help content covering project structure, GUI features, and usage
 - **AI Chat** — chat with a local LLM via Chat > AI Chat
-- **AI Help** — context-aware help assistant that uses HelpInfo data to answer questions (Help > AI Help)
+- **Fella - AI Helper** — context-aware help assistant that uses HelpInfo data to answer questions (Help > AI Help). Title bar shows a question mark icon and displays a red welcome message.
 - **Help Sync** — HelpInfo table is automatically synced with HelpTopics.xml on every launch
 
 ## Requirements
@@ -50,7 +50,7 @@ A Windows Forms desktop application built with .NET 10.0, featuring a splash scr
 | `ChatWindow.cs` | AI chat window connecting to local OpenAI-compatible endpoint |
 | `AIHelpWindow.cs` | AI-powered help assistant using HelpInfo context |
 | `OpenAIChatClient.cs` | HttpClient-based OpenAI chat completions client |
-| `HelpWindow.cs` | Browsable help topics window |
+| `HelpWindow.cs` | Browsable help topics window — groups by unique Category+Topic, shows all content values |
 | `Models/` | Entity models (`ApplicationInfo`, `HelpInfo`) |
 | `Maps/` | Fluent NHibernate maps (`ApplicationInfoMap`, `HelpInfoMap`) |
 | `HelpTopics.xml` | Help topics seeded into the database on creation and synced on every launch |

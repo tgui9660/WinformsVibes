@@ -26,7 +26,8 @@ public class AIHelpWindow : Form
     private AIHelpWindow()
     {
         StartPosition = FormStartPosition.CenterScreen;
-        Text = "AI Help";
+        Text = "Fella - AI Helper";
+        Icon = SystemIcons.Question;
         Size = new Size(700, 550);
         MinimumSize = new Size(500, 400);
         BackColor = Color.FromArgb(30, 30, 46);
@@ -95,6 +96,9 @@ public class AIHelpWindow : Form
         Controls.Add(panel);
 
         AppendSystem($"Connected to {Model} at http://192.168.2.15:8888/v1");
+        _chatLog.SelectionColor = Color.Red;
+        _chatLog.AppendText("Welcome to Fella! Your helpful AI dude.\n");
+        _chatLog.ScrollToCaret();
         _inputBox.Focus();
     }
 

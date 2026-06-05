@@ -10,7 +10,7 @@ public class HelpWindow : Form
     private RichTextBox _contentBox;
     private Label _titleLabel;
     private Label _noResultsLabel;
-    private List<HelpTopic> _allTopics = new();
+    private List<GroupedHelpTopic> _allTopics = new();
 
     public HelpWindow()
     {
@@ -88,11 +88,15 @@ public class HelpWindow : Form
 
     private void LoadTopics()
     {
-        _allTopics = DbConfig.GetHelpTopics();
+        var raw = DbConfig.GetHelpTopics();
+        _allTopics = raw
+            .GroupBy(t => (t.Category, t.Topic))
+            .Select(g => new GroupedHelpTopic(g.Key.Category, g.Key.Topic, g.Select(t => t.Content).ToList()))
+            .ToList();
         PopulateList(_allTopics);
     }
 
-    private void PopulateList(IEnumerable<HelpTopic> topics)
+    private void PopulateList(IEnumerable<GroupedHelpTopic> topics)
     {
         _listView.Items.Clear();
         foreach (var topic in topics)
@@ -111,20 +115,22 @@ public class HelpWindow : Form
             filtered = _allTopics.Where(t =>
                 t.Category.ToLower().Contains(query) ||
                 t.Topic.ToLower().Contains(query) ||
-                t.Content.ToLower().Contains(query)).ToList();
+                t.Contents.Any(c => c.ToLower().Contains(query))).ToList();
 
         PopulateList(filtered);
         _noResultsLabel.Visible = filtered.Count() == 0 && !string.IsNullOrEmpty(query);
     }
 
-    private void ShowSelectedTopic()
+   private void ShowSelectedTopic()
     {
         if (_listView.SelectedItems.Count == 0) return;
 
-        var topic = (HelpTopic)_listView.SelectedItems[0].Tag!;
-        _contentBox.Text = $"Category: {topic.Category}\nTopic: {topic.Topic}\n\n{topic.Content}";
+        var topic = (GroupedHelpTopic)_listView.SelectedItems[0].Tag!;
+        var content = string.Join("\n\n", topic.Contents);
+        _contentBox.Text = $"Category: {topic.Category}\nTopic: {topic.Topic}\n\n{content}";
         _noResultsLabel.Visible = false;
     }
 }
 
 public record HelpTopic(string Category, string Topic, string Content);
+public record GroupedHelpTopic(string Category, string Topic, List<string> Contents);
