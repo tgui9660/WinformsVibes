@@ -1,6 +1,6 @@
 # Winforms Vibes
 
-> This project was entirely vibe coded using a local Qwen3.6 LLM running on an NVIDIA RTX 3090 Ti.
+> This project was entirely vibe coded using a local Qwen3.6 LLM running on an NVIDIA RTX 3090 Ti with the latest Llama.cpp and MTP support.
 
 A Windows Forms desktop application built with .NET 10.0, featuring a splash screen, menu bar, status bar, and embedded Google Maps via WebView2.
 
