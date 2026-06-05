@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-WinformsVibes is a .NET 10.0 Windows Forms desktop application featuring a menu bar, status bar, and tabbed content (live clock, embedded Google Maps via WebView2).
+WinformsVibes is a .NET 10.0 Windows Forms desktop application with a splash screen, menu bar, status bar, and tabbed content (embedded Google Maps via WebView2). Application info (name, version, author, dependencies) is fetched from a SQL Server database via Fluent NHibernate and displayed on the splash screen at startup.
 
 ## Build and Run
 
@@ -22,7 +22,10 @@ dotnet run --project WinformsVibes.csproj
 ## Architecture
 
 ### Entry Point
-`Program.cs` — standard WinForms bootstrap with `Application.Run(new MainForm())`.
+`Program.cs` — shows the splash screen first (`Application.Run(splash)`), then launches the main form after the splash is closed (`Application.Run(new MainForm())`).
+
+### Splash Screen (`SplashScreen.cs`)
+FixedDialog form with a dark theme that displays application info (name, version, author, framework, dependencies) fetched from the database. User clicks the X to close and proceed. The Dependencies field uses a multiline TextBox for text wrapping.
 
 ### Main Form (`MainForm.cs`)
 Single-form application with:
@@ -32,6 +35,26 @@ Single-form application with:
   - **World Map** — WebView2 control initialized via `async void InitializeMapAsync` that calls `EnsureCoreWebView2Async` then navigates to Google Maps
 - **StatusStrip** — "Ready" label at bottom
 
+### Database (`DbConfig.cs`)
+Fluent NHibernate config connecting to a local SQL Server (`localhost`, database `winformsvibes`, user `sa`). The `ApplicationInfo` entity is mapped via `ApplicationInfoMap` (Fluent mapping, no XML). Proxy validation and lazy loading are disabled.
+
+#### Database Setup
+```sql
+CREATE DATABASE winformsvibes;
+USE winformsvibes;
+CREATE TABLE ApplicationInfo (
+    Id              INT IDENTITY(1,1) PRIMARY KEY,
+    ApplicationName NVARCHAR(100) NOT NULL,
+    Author          NVARCHAR(100) NOT NULL,
+    Version         NVARCHAR(50)  NOT NULL,
+    Description     NVARCHAR(500),
+    Framework       NVARCHAR(50),
+    Dependencies    NVARCHAR(MAX),
+    CreatedAt       DATETIME2     DEFAULT SYSUTCDATETIME() NOT NULL,
+    UpdatedAt       DATETIME2     DEFAULT SYSUTCDATETIME() NOT NULL
+);
+```
+
 ### WebView2 Initialization Pattern
 Critical: use `async void` with `await EnsureCoreWebView2Async()` before calling `CoreWebView2.Navigate()`. Do NOT use `ContinueWith` with async lambdas — the inner await is not tracked by the outer task, causing silent navigation failures.
 
@@ -40,7 +63,10 @@ Controls must be added in this order: TabControl first, StatusStrip second, Menu
 
 ## Dependencies
 
+- `FluentNHibernate` v3.4.0 — Fluent NHibernate mappings for database access
 - `Microsoft.Web.WebView2` v1.0.3967.48 — Chromium-based web rendering inside WinForms
+- `ReaLTaiizor` v3.8.1.8 — Material Design controls for WinForms
+- `System.Data.SqlClient` v4.8.6 — SQL Server data access
 
 ## Known Issues
 
