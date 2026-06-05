@@ -77,33 +77,28 @@ namespace WinformsVibes
             // Status bar
             _statusStrip = new StatusStrip();
             _statusLabel = new ToolStripStatusLabel("Ready");
-            _statusStrip.Items.Add(_statusLabel);
+            var spacer = new ToolStripStatusLabel { Spring = true };
+            var timeLabel = new ToolStripStatusLabel
+            {
+                Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+            };
+            _statusStrip.Items.AddRange(new ToolStripItem[] { _statusLabel, spacer, timeLabel });
 
             // Tab content
             var tab = new TabControl { Dock = DockStyle.Fill };
 
-            // Tab 1: Current Time
-            var timeTab = new TabPage("Clock");
-            var timeLabel = new Label
-            {
-                Dock = DockStyle.Fill,
-                TextAlign = ContentAlignment.MiddleCenter,
-                Font = new Font(Font.FontFamily, 48, FontStyle.Regular),
-            };
-            timeTab.Controls.Add(timeLabel);
-
-            var timer = new System.Windows.Forms.Timer { Interval = 1000 };
-            timer.Tick += (_, _) => timeLabel.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            timer.Start();
-            timeLabel.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-
-            // Tab 2: Google Maps World View
+            // Google Maps World View
             var mapTab = new TabPage("World Map");
             var webView = new WebView2 { Dock = DockStyle.Fill };
             mapTab.Controls.Add(webView);
             InitializeMapAsync(webView);
 
-            tab.TabPages.AddRange(new TabPage[] { timeTab, mapTab });
+            tab.TabPages.Add(mapTab);
+
+            // Timer to update the clock in the status bar
+            var timer = new System.Windows.Forms.Timer { Interval = 1000 };
+            timer.Tick += (_, _) => timeLabel.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            timer.Start();
 
             // Layout: menu top, status bottom, tabs fill the rest
             Controls.Add(tab);
