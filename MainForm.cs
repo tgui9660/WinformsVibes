@@ -103,7 +103,7 @@ namespace WinformsVibes
         private void ShowAboutDialog()
         {
             MessageBox.Show(
-                "Winforms Vibes\nVersion 1.0\n\nA simple Windows Forms demo application.",
+                "Winforms Vibes\nVersion 1.0\n\nAuthor: Eric\n\nA simple Windows Forms demo application.",
                 "About Winforms Vibes",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
