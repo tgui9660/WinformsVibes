@@ -42,7 +42,7 @@ public class ChatWindow : Form
             ForeColor = Color.LightGray,
             BorderStyle = BorderStyle.None,
             ReadOnly = true,
-            Font = new Font("Consolas", 10f),
+            Font = new Font("Consolas", 15f),
         };
 
         // --- Input bar ---
@@ -50,8 +50,9 @@ public class ChatWindow : Form
         {
             BackColor = Color.FromArgb(45, 45, 60),
             ForeColor = Color.WhiteSmoke,
-            Font = new Font("Segoe UI", 11f),
+            Font = new Font("Segoe UI", 16.5f),
             PlaceholderText = "Type a message...",
+            Height = 37,
         };
         _inputBox.KeyDown += OnInputKeyDown;
 
@@ -61,7 +62,8 @@ public class ChatWindow : Form
             FlatStyle = FlatStyle.Flat,
             BackColor = Color.FromArgb(55, 55, 80),
             ForeColor = Color.WhiteSmoke,
-            Font = new Font("Segoe UI", 10f),
+            Font = new Font("Segoe UI", 16.5f),
+            Height = 37,
         };
         _sendButton.Click += OnSend;
 
@@ -69,7 +71,7 @@ public class ChatWindow : Form
         var inputPanel = new TableLayoutPanel
         {
             Dock = DockStyle.Bottom,
-            Height = 45,
+            Height = 68,
             BackColor = Color.FromArgb(30, 30, 46),
             ColumnCount = 3,
             RowCount = 1,
@@ -83,8 +85,8 @@ public class ChatWindow : Form
         };
         inputPanel.Controls.Add(_inputBox, 0, 0);
         inputPanel.Controls.Add(_sendButton, 2, 0);
-        _inputBox.Dock = DockStyle.Fill;
-        _sendButton.Dock = DockStyle.Fill;
+        _inputBox.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+        _sendButton.Anchor = AnchorStyles.None;
 
         panel.Controls.Add(_chatLog);
         panel.Controls.Add(inputPanel);

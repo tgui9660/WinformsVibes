@@ -63,6 +63,42 @@ public static class DbConfig
             .ToList();
     }
 
+    public static void SyncHelpTopics()
+    {
+        var xmlPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "HelpTopics.xml");
+        if (!System.IO.File.Exists(xmlPath)) return;
+
+        var xmlCount = XDocument.Load(xmlPath).Descendants("Topic").Count();
+
+        using var conn = new SqlConnection(ConnectionString);
+        conn.Open();
+
+        using (var countCmd = conn.CreateCommand())
+        {
+            countCmd.CommandText = "SELECT COUNT(1) FROM HelpInfo";
+            var dbCount = (int)countCmd.ExecuteScalar();
+
+            if (dbCount == xmlCount) return;
+        }
+
+        using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText = "TRUNCATE TABLE HelpInfo";
+            cmd.ExecuteNonQuery();
+        }
+
+        var doc = XDocument.Load(xmlPath);
+        foreach (var topic in doc.Descendants("Topic"))
+        {
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "INSERT INTO HelpInfo (Category, Topic, Content) VALUES (@cat, @topic, @content)";
+            cmd.Parameters.AddWithValue("@cat", topic.Attribute("Category")!.Value);
+            cmd.Parameters.AddWithValue("@topic", topic.Attribute("Name")!.Value);
+            cmd.Parameters.AddWithValue("@content", topic.Value.Trim());
+            cmd.ExecuteNonQuery();
+        }
+    }
+
     public static bool CreateAndSeedDatabase(string databaseName, out string errorMessage)
     {
         try

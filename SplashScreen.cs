@@ -82,29 +82,6 @@ public class SplashScreen : Form
             AutoSize = false,
         };
 
-        var depsLabel = new Label
-        {
-            Text = "Dependencies:",
-            Font = new Font("Segoe UI", 9f, FontStyle.Bold),
-            ForeColor = Color.Gray,
-            Location = new Point(20, 205),
-            Size = new Size(380, 20),
-            AutoSize = false,
-        };
-
-        var deps = new TextBox
-        {
-            Text = info.Dependencies ?? string.Empty,
-            Font = new Font("Consolas", 9f),
-            ForeColor = Color.FromArgb(140, 140, 160),
-            BackColor = Color.FromArgb(30, 30, 46),
-            Location = new Point(20, 225),
-            Size = new Size(380, 50),
-            Multiline = true,
-            ReadOnly = true,
-            BorderStyle = BorderStyle.None,
-        };
-
         var loading = new Label
         {
             Text = "Loading...",
@@ -115,7 +92,7 @@ public class SplashScreen : Form
             AutoSize = false,
         };
 
-        panel.Controls.AddRange(new Control[] { title, version, author, framework, database, separator, depsLabel, deps, loading });
+        panel.Controls.AddRange(new Control[] { title, version, author, framework, database, separator, loading });
         this.Controls.Add(panel);
 
         this.Text = info.ApplicationName;

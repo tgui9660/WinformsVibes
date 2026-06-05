@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-WinformsVibes is a .NET 10.0 Windows Forms desktop application with a splash screen, menu bar, status bar, and tabbed content (embedded Google Maps via WebView2). Application info (name, version, author, dependencies) is fetched from a SQL Server database via Fluent NHibernate and displayed on the splash screen at startup. On first launch (or when the configured database is unavailable), a setup dialog lets the user create and name a new database. Includes a help topics browser and an AI chat window that connects to a local OpenAI-compatible endpoint (192.168.2.15:8888).
+WinformsVibes is a .NET 10.0 Windows Forms desktop application with a splash screen, menu bar, status bar, and tabbed content (embedded Google Maps via WebView2). Application info (name, version, author, framework, database) is fetched from a SQL Server database via Fluent NHibernate and displayed on the splash screen at startup. On first launch (or when the configured database is unavailable), a setup dialog lets the user create and name a new database. Includes a help topics browser, an AI chat window, and an AI help assistant that uses HelpInfo data as context. All connect to a local OpenAI-compatible endpoint (192.168.2.15:8888).
 
 ## Build and Run
 
@@ -25,13 +25,13 @@ dotnet run --project WinformsVibes.csproj
 ## Architecture
 
 ### Entry Point
-`Program.cs` — checks database connectivity. If unreachable, shows the database setup dialog (`DatabaseSetupDialog`). On success, shows the splash screen (`Application.Run(splash)`), then launches the main form after the splash is closed (`Application.Run(new MainForm())`).
+`Program.cs` — checks database connectivity. If unreachable, shows the database setup dialog (`DatabaseSetupDialog`). On success, syncs HelpInfo with HelpTopics.xml via `DbConfig.SyncHelpTopics()`, shows the splash screen (`Application.Run(splash)`), then launches the main form after the splash is closed (`Application.Run(new MainForm())`).
 
 ### Database Setup Dialog (`DatabaseSetupDialog.cs`)
 Dark-themed dialog shown when no database connection is available. User enters a database name, clicks Create, and the app creates the database, tables, and seed data. Pressing Enter submits; Escape cancels.
 
 ### Splash Screen (`SplashScreen.cs`)
-FixedDialog form with a dark theme that displays application info (name, version, author, framework, database, dependencies) fetched from the database. User clicks the X to close and proceed. The Dependencies field uses a multiline TextBox for text wrapping.
+FixedDialog form with a dark theme that displays application info (name, version, author, framework, database) fetched from the database. User clicks the X to close and proceed.
 
 ### Main Form (`MainForm.cs`)
 Single-form application with:
@@ -44,10 +44,10 @@ Single-form application with:
 Dark-themed window opened via Help > Contents. Lists help topics from the database in a ListView on the left; clicking a topic displays its content in a RichTextBox on the right. Includes a search box to filter topics by category, name, or content.
 
 ### AI Chat Window (`ChatWindow.cs`)
-Singleton window opened via Chat > AI Chat. Connects to an OpenAI-compatible endpoint at `http://192.168.2.15:8888/v1` using the `OpenAIChatClient`. API key (`"apikey"`) and model (`"Qwen3.6-27B-MTP-Q4_K_M"`) are hardcoded. Clicking X hides the window rather than closing it, preserving chat history across open/close cycles. User messages are displayed in blue and retain formatting via RTF preservation when removing the "Thinking..." placeholder.
+Singleton window opened via Chat > AI Chat. Connects to an OpenAI-compatible endpoint at `http://192.168.2.15:8888/v1` using the `OpenAIChatClient`. API key (`"apikey"`) and model (`"Qwen3.6-27B-MTP-Q4_K_M"`) are hardcoded. Clicking X hides the window rather than closing it, preserving chat history across open/close cycles. User messages are displayed in blue and retain formatting via RTF preservation when removing the "Thinking..." placeholder. Chat log uses Consolas 15f, input and send button use Segoe UI 16.5f with matching explicit heights.
 
 ### AI Help Window (`AIHelpWindow.cs`)
-Copy of ChatWindow with title "AI Help". Opened via Help > AI Help. Same singleton pattern, hides on close, preserves chat history.
+Copy of ChatWindow with title "AI Help". Opened via Help > AI Help. Same singleton pattern, hides on close, preserves chat history. Uses same font sizes and layout as ChatWindow. Loads all HelpInfo topics from the database at startup and includes them in the system prompt so the AI can answer questions based on actual help content.
 
 ### OpenAI Chat Client (`OpenAIChatClient.cs`)
 Uses `HttpClient` with `System.Text.Json` to call the OpenAI `/chat/completions` endpoint. Takes `apiKey`, `model`, and optional `baseUrl` in the constructor. No external NuGet packages required.
@@ -59,6 +59,7 @@ Fluent NHibernate config connecting to a local SQL Server. Connection details (s
 - `CreateAndSeedDatabase(name)` — creates the database, the `ApplicationInfo` and `HelpInfo` tables, seeds `ApplicationInfo` with default app data, and seeds `HelpInfo` from `HelpTopics.xml`
 - `CurrentDatabaseName` — exposes the active database name for display on the splash screen
 - `GetHelpTopics()` — returns a list of `HelpTopic` records for the HelpWindow
+- `SyncHelpTopics()` — compares HelpInfo row count with HelpTopics.xml `<Topic>` count; if they differ, truncates and re-seeds from XML
 
 #### Config File (`dbconfig.json`)
 Created automatically in the output directory (`bin/Debug/net10.0-windows/`) when the user creates a database via the setup dialog. Storing the connection here means the app remembers the database across launches. Deleting this file triggers the setup dialog on next launch.
@@ -69,7 +70,7 @@ Created automatically in the output directory (`bin/Debug/net10.0-windows/`) whe
 - Proxy validation and lazy loading are disabled
 
 #### Help Topics (`HelpTopics.xml`)
-XML file (copied to output on build) that defines the help topics seeded into the `HelpInfo` table on database creation. Each `<Topic>` element has `Category` and `Name` attributes and text content. Edit this file to change the help content.
+XML file (copied to output on build) that defines the help topics seeded into the `HelpInfo` table on database creation. Each `<Topic>` element has `Category` and `Name` attributes and text content. Edit this file to change the help content. On every launch, `SyncHelpTopics()` compares the row count in the HelpInfo table with the number of `<Topic>` elements in the XML. If they differ, the table is truncated and re-seeded from the XML.
 
 ### WebView2 Initialization Pattern
 Critical: use `async void` with `await EnsureCoreWebView2Async()` before calling `CoreWebView2.Navigate()`. Do NOT use `ContinueWith` with async lambdas — the inner await is not tracked by the outer task, causing silent navigation failures.

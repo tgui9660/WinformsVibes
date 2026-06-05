@@ -33,6 +33,9 @@ internal static class Program
             }
         }
 
+        // Sync HelpInfo table with HelpTopics.xml if counts differ
+        DbConfig.SyncHelpTopics();
+
         // Show splash screen — waits for user to click it to close
         var info = DbConfig.GetApplicationInfo() ?? new();
         info.DatabaseName = DbConfig.CurrentDatabaseName;

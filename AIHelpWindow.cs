@@ -10,6 +10,7 @@ public class AIHelpWindow : Form
 
     private static AIHelpWindow? _instance;
 
+    private readonly List<HelpTopic> _helpTopics;
     private readonly RichTextBox _chatLog;
     private readonly TextBox _inputBox;
     private readonly Button _sendButton;
@@ -31,6 +32,7 @@ public class AIHelpWindow : Form
         BackColor = Color.FromArgb(30, 30, 46);
 
         _client = new OpenAIChatClient(ApiKey, Model);
+        _helpTopics = DbConfig.GetHelpTopics();
 
         var panel = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(30, 30, 46) };
 
@@ -42,7 +44,7 @@ public class AIHelpWindow : Form
             ForeColor = Color.LightGray,
             BorderStyle = BorderStyle.None,
             ReadOnly = true,
-            Font = new Font("Consolas", 10f),
+            Font = new Font("Consolas", 15f),
         };
 
         // --- Input bar ---
@@ -50,8 +52,9 @@ public class AIHelpWindow : Form
         {
             BackColor = Color.FromArgb(45, 45, 60),
             ForeColor = Color.WhiteSmoke,
-            Font = new Font("Segoe UI", 11f),
+            Font = new Font("Segoe UI", 16.5f),
             PlaceholderText = "Type a message...",
+            Height = 37,
         };
         _inputBox.KeyDown += OnInputKeyDown;
 
@@ -61,7 +64,8 @@ public class AIHelpWindow : Form
             FlatStyle = FlatStyle.Flat,
             BackColor = Color.FromArgb(55, 55, 80),
             ForeColor = Color.WhiteSmoke,
-            Font = new Font("Segoe UI", 10f),
+            Font = new Font("Segoe UI", 16.5f),
+            Height = 37,
         };
         _sendButton.Click += OnSend;
 
@@ -69,7 +73,7 @@ public class AIHelpWindow : Form
         var inputPanel = new TableLayoutPanel
         {
             Dock = DockStyle.Bottom,
-            Height = 45,
+            Height = 68,
             BackColor = Color.FromArgb(30, 30, 46),
             ColumnCount = 3,
             RowCount = 1,
@@ -83,8 +87,8 @@ public class AIHelpWindow : Form
         };
         inputPanel.Controls.Add(_inputBox, 0, 0);
         inputPanel.Controls.Add(_sendButton, 2, 0);
-        _inputBox.Dock = DockStyle.Fill;
-        _sendButton.Dock = DockStyle.Fill;
+        _inputBox.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+        _sendButton.Anchor = AnchorStyles.None;
 
         panel.Controls.Add(_chatLog);
         panel.Controls.Add(inputPanel);
@@ -106,7 +110,7 @@ public class AIHelpWindow : Form
 
         try
         {
-            var reply = await _client.ChatAsync(message);
+            var reply = await _client.ChatAsync(message, BuildSystemPrompt());
             _chatLog.Rtf = rtfBeforePlaceholder;
             AppendAssistant(reply);
         }
@@ -115,6 +119,19 @@ public class AIHelpWindow : Form
             _chatLog.Rtf = rtfBeforePlaceholder;
             AppendSystem($"Error: {ex.Message}");
         }
+    }
+
+    private string BuildSystemPrompt()
+    {
+        var sb = new System.Text.StringBuilder();
+        sb.Append("You are a helpful assistant for the Winforms Vibes application. ");
+        sb.Append("Use the following help topics to answer user questions. ");
+        sb.Append("If a question isn't covered by these topics, do your best to help.\n\n");
+        foreach (var topic in _helpTopics)
+        {
+            sb.Append($"[{topic.Category}] {topic.Topic}:\n{topic.Content}\n\n");
+        }
+        return sb.ToString();
     }
 
     private void OnInputKeyDown(object? sender, KeyEventArgs e)

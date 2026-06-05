@@ -33,4 +33,28 @@
   <Topic Category="How to Use" Name="Browsing Help Topics">
     Help topics are stored in the HelpInfo table and can be browsed from the Help menu. Select a topic to view its content in a dialog.
   </Topic>
+  <Topic Category="Eric" Name="Favorite Foods">
+    Pizza
+  </Topic>
+  <Topic Category="Eric" Name="Favorite Foods">
+    Hotdog
+  </Topic>
+  <Topic Category="Eric" Name="Favorite Foods">
+    Cheese
+  </Topic>
+  <Topic Category="Eric" Name="Favorite Foods">
+    Carrot
+  </Topic>
+  <Topic Category="Eric" Name="Favorite Foods">
+    Kebab
+  </Topic>
+  <Topic Category="Eric" Name="Favorite Foods">
+    Sushi
+  </Topic>
+  <Topic Category="Eric" Name="Favorite Foods">
+    Salad
+  </Topic>
+  <Topic Category="Eric" Name="Favorite Foods">
+    Bread
+  </Topic>
 </HelpTopics>
