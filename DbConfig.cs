@@ -68,18 +68,8 @@ public static class DbConfig
         var xmlPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "HelpTopics.xml");
         if (!System.IO.File.Exists(xmlPath)) return;
 
-        var xmlCount = XDocument.Load(xmlPath).Descendants("Topic").Count();
-
         using var conn = new SqlConnection(ConnectionString);
         conn.Open();
-
-        using (var countCmd = conn.CreateCommand())
-        {
-            countCmd.CommandText = "SELECT COUNT(1) FROM HelpInfo";
-            var dbCount = (int)countCmd.ExecuteScalar();
-
-            if (dbCount == xmlCount) return;
-        }
 
         using (var cmd = conn.CreateCommand())
         {

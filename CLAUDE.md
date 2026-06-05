@@ -64,7 +64,7 @@ Fluent NHibernate config connecting to a local SQL Server. Connection details ar
 - `CurrentDatabaseName` — exposes the active database name for display on the splash screen
 - `GetApplicationInfo()` — queries the single ApplicationInfo row
 - `GetHelpTopics()` — returns a list of `HelpTopic` records for the HelpWindow
-- `SyncHelpTopics()` — compares HelpInfo row count with HelpTopics.xml `<Topic>` count; if they differ, truncates and re-seeds from XML
+- `SyncHelpTopics()` — truncates HelpInfo and re-seeds from HelpTopics.xml on every launch (XML is the source of truth)
 
 #### Settings (`DbSettings.cs`)
 `DbSettings` POCO with Server, DatabaseName, UserId, Password properties. `DbSettingsManager` reads/writes `dbconfig.json` from the output directory using `System.Text.Json`. If the file is missing, returns a `DbSettings` with defaults (`localhost`/`winformsvibes`/`sa`/`password`).
@@ -79,7 +79,7 @@ Created automatically in the output directory (`bin/Debug/net10.0-windows/`) whe
 - `ApplicationInfo.DatabaseName` is **not mapped** to the database — set at runtime for display purposes
 
 #### Help Topics (`HelpTopics.xml`)
-XML file (copied to output on build) that defines the help topics seeded into the `HelpInfo` table on database creation. Each `<Topic>` element has `Category` and `Name` attributes and text content. Edit this file to change the help content. On every launch, `SyncHelpTopics()` compares the row count in the HelpInfo table with the number of `<Topic>` elements in the XML. If they differ, the table is truncated and re-seeded from the XML.
+XML file (copied to output on build) that defines the help topics seeded into the `HelpInfo` table. Each `<Topic>` element has `Category` and `Name` attributes and text content. Edit this file to change the help content. On every launch, `SyncHelpTopics()` truncates HelpInfo and re-seeds from the XML — the XML is the single source of truth.
 
 ### WebView2 Initialization Pattern
 Critical: use `async void` with `await EnsureCoreWebView2Async()` before calling `CoreWebView2.Navigate()`. Do NOT use `ContinueWith` with async lambdas — the inner await is not tracked by the outer task, causing silent navigation failures.
