@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-WinformsVibes is a .NET 10.0 Windows Forms desktop application with a splash screen, menu bar, status bar, and tabbed content (embedded Google Maps via WebView2 with interactive lat/long inputs). Application info is fetched from a SQL Server database via Fluent NHibernate and displayed on the splash screen at startup. On first launch (or when the configured database is unavailable), a setup dialog lets the user create and name a new database. Includes a help topics browser, an AI chat window, an AI help assistant that uses HelpInfo data as context, and an AI map chat window for programmatic queries. All AI windows connect to a local OpenAI-compatible endpoint (192.168.2.15:8888).
+WinformsVibes is a .NET 10.0 Windows Forms desktop application, entirely AI-generated using a local Qwen3.6 LLM. It features a splash screen, menu bar, status bar, and tabbed content with embedded Google Maps via WebView2. Application info is fetched from a SQL Server database via Fluent NHibernate and displayed on the splash screen at startup. On first launch (or when the configured database is unavailable), a setup dialog lets the user create and name a new database. Includes a help topics browser, an AI chat window, an AI help assistant that uses HelpInfo data as context, and an AI map chat window for programmatic queries. All AI windows connect to a local OpenAI-compatible endpoint (192.168.2.15:8888).
+
+**System requirements:** .NET 10.0 SDK, SQL Server with `sa` authentication, Windows 10+ (for WebView2).
 
 ## Build and Run
 
@@ -15,8 +17,11 @@ dotnet build WinformsVibes.csproj -p:Configuration=Debug
 # Run (no IIS needed — native WinForms exe)
 dotnet run --project WinformsVibes.csproj
 
-# Run via batch file (double-click or from cmd)
+# Run via batch file (double-click or from cmd) — builds then launches
 .\RunMe.bat
+
+# Build a distributable release
+.\BuildRelease.bat
 
 # Run the compiled exe directly
 .\bin\Debug\net10.0-windows\WinformsVibes.exe
@@ -45,10 +50,10 @@ Extends `MaterialForm` from ReaLTaiizor (Material Design form base). Single-form
 - **Icon** — procedurally drawn bear face via `CreateBearIcon()`
 
 #### Help Window (`GUI/HelpWindow.cs`)
-Dark-themed window opened via Help > Contents. Groups help topics by unique Category+Topic pairs and displays all content values when selected. Search filters across category, topic name, and all content values. Uses `GroupedHelpTopic` record with a `List<string>` of contents. Also defines the `HelpTopic` record used by `DbConfig.GetHelpTopics()`.
+Dark-themed window opened via Help > Contents. Has a question mark icon (`SystemIcons.Question`). Groups help topics by unique Category+Topic pairs and displays all content values when selected. Search filters across category, topic name, and all content values. Uses `GroupedHelpTopic` record with a `List<string>` of contents. Also defines the `HelpTopic` record used by `DbConfig.GetHelpTopics()`.
 
 #### AI Chat Window (`GUI/ChatWindow.cs`)
-Singleton window opened via Chat > AI Chat. Connects to an OpenAI-compatible endpoint at `http://192.168.2.15:8888/v1` using the `OpenAIChatClient`. API key (`"apikey"`) and model (`"Qwen3.6-27B-MTP-Q4_K_M"`) are hardcoded. Clicking X hides the window rather than closing it, preserving chat history across open/close cycles. User messages are displayed in blue and retain formatting via RTF preservation when removing the "Thinking..." placeholder. Chat log uses Consolas 15f, input and send button use Segoe UI 16.5f with matching explicit heights.
+Singleton window opened via Chat > AI Chat. Has a yellow smiley face icon drawn via `CreateSmileyIcon()`. Connects to an OpenAI-compatible endpoint at `http://192.168.2.15:8888/v1` using the `OpenAIChatClient`. API key (`"apikey"`) and model (`"Qwen3.6-27B-MTP-Q4_K_M"`) are hardcoded. Clicking X hides the window rather than closing it, preserving chat history across open/close cycles. User messages are displayed in blue and retain formatting via RTF preservation when removing the "Thinking..." placeholder. Chat log uses Consolas 15f, input and send button use Segoe UI 16.5f with matching explicit heights.
 
 #### AI Help Window (`GUI/AIHelpWindow.cs`)
 Titled "Fella - AI Helper" with a question mark icon (`SystemIcons.Question`). Opened via Help > AI Help. Same singleton pattern, hides on close, preserves chat history. Uses same font sizes and layout as ChatWindow. Displays a red welcome message: "Welcome to Fella! Your helpful AI dude." Loads all HelpInfo topics from the database at startup and includes them in the system prompt so the AI can answer questions based on actual help content.
@@ -86,6 +91,9 @@ Created automatically in the output directory (`bin/Debug/net10.0-windows/`) whe
 
 #### Help Topics (`HelpTopics.xml`)
 XML file (copied to output on build) that defines the help topics seeded into the `HelpInfo` table. Each `<Topic>` element has `Category` and `Name` attributes and text content. Edit this file to change the help content. On every launch, `SyncHelpTopics()` truncates HelpInfo and re-seeds from the XML — the XML is the single source of truth.
+
+#### Build Release (`BuildRelease.bat`)
+Publishes the project in Release mode for win-x64 and outputs to `Releases/Build-{timestamp}/` with a `YYYYMMDD_HHmmSS` timestamp. Framework-dependent build (not self-contained).
 
 ### WebView2 Initialization Pattern
 Critical: use `async void` with `await EnsureCoreWebView2Async()` before calling `CoreWebView2.Navigate()`. Do NOT use `ContinueWith` with async lambdas — the inner await is not tracked by the outer task, causing silent navigation failures.

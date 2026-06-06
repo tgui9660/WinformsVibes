@@ -15,6 +15,7 @@ A Windows Forms desktop application built with .NET 10.0, featuring a splash scr
 - **AI Chat** — chat with a local LLM via Chat > AI Chat
 - **Fella - AI Helper** — context-aware help assistant that uses HelpInfo data to answer questions (Help > AI Help). Title bar shows a question mark icon and displays a red welcome message.
 - **Help Sync** — HelpInfo table is automatically synced with HelpTopics.xml on every launch
+- **Build Release** — BuildRelease.bat publishes a release to a timestamped folder under Releases/
 
 ## Requirements
 
@@ -33,9 +34,11 @@ A Windows Forms desktop application built with .NET 10.0, featuring a splash scr
    ```powershell
    dotnet run --project WinformsVibes.csproj
    ```
-   Or double-click `RunMe.bat` to launch directly.
+   Or double-click `RunMe.bat` to build and launch directly.
 
 3. **First Launch** — if no database is configured, a setup dialog appears. Enter a database name and click **Create**. The app handles the rest.
+
+4. **Build a Release** — run `BuildRelease.bat` to publish a distributable release to `Releases/Build-{timestamp}/`.
 
 ## Project Structure
 
@@ -54,7 +57,8 @@ A Windows Forms desktop application built with .NET 10.0, featuring a splash scr
 | `Models/` | Entity models (`ApplicationInfo`, `HelpInfo`) |
 | `Maps/` | Fluent NHibernate maps (`ApplicationInfoMap`, `HelpInfoMap`) |
 | `HelpTopics.xml` | Help topics seeded into the database on creation and synced on every launch |
-| `RunMe.bat` | Batch file launcher |
+| `RunMe.bat` | Batch file launcher — builds then launches the app |
+| `BuildRelease.bat` | Publishes a distributable release to `Releases/Build-{timestamp}/` |
 
 ## Configuration
 

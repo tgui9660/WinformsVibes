@@ -17,6 +17,7 @@ public class HelpWindow : Form
     {
         this.StartPosition = FormStartPosition.CenterScreen;
         this.Text = "Help Contents";
+        this.Icon = SystemIcons.Question;
         this.Size = new Size(640, 500);
         this.MinimumSize = new Size(480, 400);
         this.BackColor = Color.FromArgb(30, 30, 46);

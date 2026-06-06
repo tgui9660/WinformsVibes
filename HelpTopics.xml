@@ -1,37 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
 <HelpTopics>
   <Topic Category="Project Structure" Name="Solution Layout">
-    The project is a single .NET 10.0 Windows Forms application. Source files live alongside the .csproj. Models are under Models/, Fluent NHibernate maps are under Maps/, and the main entry point is Program.cs.
+    The project is a single .NET 10.0 Windows Forms application. Source files live alongside the .csproj. GUI forms are under GUI/, AI clients under AI/, database access under Database/, entity models under Models/, and Fluent NHibernate maps under Maps/. The main entry point is Program.cs.
   </Topic>
   <Topic Category="Project Structure" Name="Database Layer">
-    Database access is handled by Fluent NHibernate with SQL Server as the backend. DbConfig.cs configures the session factory and connection. A JSON config file (dbconfig.json) stores the active database name and connection details.
+    Database access is handled by Fluent NHibernate with SQL Server as the backend. DbConfig.cs configures the session factory, seeds data, and syncs help topics. DbSettings.cs loads and saves connection details from dbconfig.json in the output directory.
   </Topic>
   <Topic Category="Project Structure" Name="Dependencies">
     Microsoft.Web.WebView2 — embeds Chromium-based web content inside WinForms. FluentNHibernate — fluent mappings for NHibernate. ReaLTaiizor — Material Design controls for WinForms. System.Data.SqlClient — SQL Server data access.
   </Topic>
+  <Topic Category="Project Structure" Name="Build Release">
+    A BuildRelease.bat script is provided to produce a distributable release. It publishes the project in Release mode for win-x64 and outputs to a timestamped folder under Releases/ (e.g., Releases/Build-20260606_120000).
+  </Topic>
   <Topic Category="GUI Features" Name="Splash Screen">
-    Shown at startup. Displays application info (name, version, author, framework, database, dependencies) fetched from the database. Click the close button (X) to dismiss and proceed to the main form.
+    Shown at startup. Displays application info (name, version, author, framework, database) fetched from the database. A loading indicator is shown at the bottom. Click the close button (X) to dismiss and proceed to the main form.
   </Topic>
   <Topic Category="GUI Features" Name="Main Form">
-    Single-form application with a MenuStrip (File, Edit, View, Settings, Help), a StatusStrip with a live clock, and a TabControl. The World Map tab embeds a WebView2 control that loads Google Maps.
+    Single-form application that opens maximized. Features a MenuStrip, a StatusStrip with a live clock, and a TabControl. The app icon is a procedurally drawn bear face. The main tab is the World Map, which embeds Google Maps via WebView2.
   </Topic>
   <Topic Category="GUI Features" Name="Menu Bar">
-    File — New, Open, Save, Exit. Edit — Copy, Paste. View — Toggle Fullscreen (F11), About. Settings — Preferences. Help — Contents, About (F1).
+    File — New, Open, Save, Exit. Edit — Copy, Paste. View — Toggle Fullscreen, About. Settings — Preferences. Chat — AI Chat. Help — Contents, AI Help, About. File menu Exit closes the application. View and Help both have an About item that shows the same dialog.
   </Topic>
   <Topic Category="GUI Features" Name="Status Bar">
-    Displayed at the bottom of the main form. Shows a "Ready" label on the left and a live-updating clock (refreshes every second) on the right.
+    Displayed at the bottom of the main form. Shows a "Ready" label on the left and a live-updating clock (refreshes every second) on the right. The clock format is yyyy-MM-dd HH:mm:ss.
+  </Topic>
+  <Topic Category="GUI Features" Name="World Map Tab">
+    The default and only tab page embeds a WebView2 control loaded with Google Maps. At the bottom is a coordinate panel with Lat and Long text inputs. Pressing Enter in either field navigates the map to those coordinates. The inputs update automatically as you pan or zoom the map.
+  </Topic>
+  <Topic Category="GUI Features" Name="Tell Me More Button">
+    Located in the World Map coordinate panel. It is disabled when both Lat and Long are 0. When clicked, it opens the AI Map Chat window and asks the AI about the first city within a 5 mile radius of the current coordinates.
+  </Topic>
+  <Topic Category="GUI Features" Name="About Dialog">
+    Accessible from View &gt; About or Help &gt; About. Shows the application name, version 1.0, author (Eric), and a short description.
+  </Topic>
+  <Topic Category="GUI Features" Name="Toggle Fullscreen">
+    Accessible from View &gt; Toggle Fullscreen. Switches the main form between maximized and normal window states.
+  </Topic>
+  <Topic Category="GUI Features" Name="Database Setup Dialog">
+    Shown on first launch or when the configured database is unreachable. Dark-themed dialog with a text input for the database name, a Create button, and a Cancel button. Pressing Enter in the text field submits; pressing Escape cancels and exits the application.
+  </Topic>
+  <Topic Category="GUI Features" Name="Help Topics Browser">
+    Opened via Help &gt; Contents. Dark-themed window with a search box, a list of topics on the left, and a content pane on the right. Topics are grouped by unique Category and Topic name pairs, so multiple entries with the same category and name are combined. Selecting a topic displays all its content values. The search filters across category, topic name, and content text.
+  </Topic>
+  <Topic Category="GUI Features" Name="AI Chat Window">
+    Opened via Chat &gt; AI Chat. Connects to a local OpenAI-compatible endpoint at http://192.168.2.15:8888/v1 using the Qwen3.6-27B-MTP-Q4_K_M model. Chat log uses Consolas 15f font. User messages are displayed in blue, assistant responses in green, and system messages in gray. A Thinking... animation cycles dots while waiting for a reply. Clicking X hides the window rather than closing it, preserving chat history.
+  </Topic>
+  <Topic Category="GUI Features" Name="AI Help Window">
+    Opened via Help &gt; AI Help. Titled "Fella - AI Helper" with a question mark icon. Loads all HelpInfo topics from the database at startup and includes them in the system prompt, so the AI can answer questions based on actual help content. Displays a red welcome message: "Welcome to Fella! Your helpful AI dude." Same singleton pattern as the AI Chat window.
+  </Topic>
+  <Topic Category="GUI Features" Name="AI Map Chat Window">
+    Opened automatically by the Tell Me More! button, or by calling AskAsync() programmatically. Same dark theme and layout as the AI Chat window. Assistant responses are displayed in green. Exposes AskAsync(string message) so other components can send messages without user input.
+  </Topic>
+  <Topic Category="GUI Features" Name="Thinking Animation">
+    All three AI chat windows show a Thinking... placeholder that cycles through dot counts (1 to 3) every 400ms while waiting for a response. The placeholder is removed by restoring the RTF content from before it was inserted, preserving user message formatting.
   </Topic>
   <Topic Category="How to Use" Name="First Launch">
-    On first launch (or when the configured database is unavailable), a Database Setup dialog appears. Enter a database name and click Create. The app creates the database, tables, and seed data automatically.
+    On first launch (or when the configured database is unavailable), a Database Setup dialog appears. Enter a database name and click Create (or press Enter). The app creates the database, the ApplicationInfo and HelpInfo tables, seeds default data, and proceeds. Pressing Escape cancels and exits.
   </Topic>
   <Topic Category="How to Use" Name="Running the Application">
-    Double-click RunMe.bat to launch, or run "dotnet run --project WinformsVibes.csproj" from a terminal. You can also build with "dotnet build" and run the compiled exe directly from bin/Debug/net10.0-windows/.
+    Double-click RunMe.bat to build and launch the application. From a terminal, run "dotnet build" followed by the exe directly from bin/Debug/net10.0-windows/. Note: running via dotnet run in Git Bash exits immediately; use RunMe.bat or the exe instead.
   </Topic>
   <Topic Category="How to Use" Name="Switching Databases">
-    The active database is stored in dbconfig.json (next to the exe). Edit the "DatabaseName" field to switch, or delete the file to trigger the setup dialog again on next launch.
+    The active database is stored in dbconfig.json (next to the exe in the output directory). Edit the "DatabaseName" field to switch, or delete the file to trigger the setup dialog again on next launch.
   </Topic>
-  <Topic Category="How to Use" Name="Browsing Help Topics">
-    Help topics are stored in the HelpInfo table and can be browsed from the Help menu. Select a topic to view its content in a dialog.
+  <Topic Category="How to Use" Name="Navigating the Map">
+    Click anywhere on the Google Maps view to select a location. The Lat and Long inputs at the bottom update automatically. You can also type coordinates directly into the inputs and press Enter to navigate. Coordinates in the URL are parsed back into the inputs when the map source changes.
+  </Topic>
+  <Topic Category="How to Use" Name="Using AI Chat">
+    Open Chat &gt; AI Chat to start a conversation with the local AI model. Type a message and press Enter or click Send. The chat preserves full history across open/close cycles since the window hides rather than closes when you click X.
+  </Topic>
+  <Topic Category="How to Use" Name="Using AI Help">
+    Open Help &gt; AI Help to ask Fella questions about the application. Fella has context from all HelpInfo topics loaded at startup, so it can answer questions about features, usage, and configuration. Like the AI Chat window, it preserves chat history across open/close cycles.
+  </Topic>
+  <Topic Category="How to Use" Name="Using Tell Me More">
+    Navigate to a location on the map (by clicking or entering coordinates). When the Tell Me More! button is enabled, click it to open the AI Map Chat and ask the AI about the nearest city within a 5 mile radius of the selected coordinates.
+  </Topic>
+  <Topic Category="How to Use" Name="Help Topics Sync">
+    On every launch, the HelpInfo table is truncated and re-seeded from HelpTopics.xml. The XML file is the single source of truth. Edit HelpTopics.xml to add, remove, or modify help topics, then rebuild to copy the updated XML to the output directory.
+  </Topic>
+  <Topic Category="How to Use" Name="Building a Release">
+    Run BuildRelease.bat to publish the project in Release mode. The output is placed in Releases/Build-{timestamp}/ with the current date and time. The release is a framework-dependent win-x64 build.
+  </Topic>
+  <Topic Category="System Requirements" Name="Prerequisites">
+    Requires .NET 10.0 SDK to build and run. SQL Server with sa authentication enabled is needed for the database backend. Windows 10 or later is required for WebView2 support.
+  </Topic>
+  <Topic Category="System Requirements" Name="AI Endpoint">
+    The AI chat windows connect to a local OpenAI-compatible endpoint at http://192.168.2.15:8888/v1. The API key is "apikey" and the model is "Qwen3.6-27B-MTP-Q4_K_M". These values are hardcoded in each chat window class.
+  </Topic>
+  <Topic Category="Known Issues" Name="WindowsBase Warning">
+    A WindowsBase version conflict warning (MSB3277) appears during build due to WebView2 referencing net5.0 assemblies against net10.0. This is harmless and safe to ignore.
   </Topic>
   <Topic Category="Eric" Name="Favorite Foods">
     Pizza

@@ -30,6 +30,7 @@ public class ChatWindow : Form
     {
         StartPosition = FormStartPosition.CenterScreen;
         Text = "AI Chat";
+        Icon = CreateSmileyIcon();
         Size = new Size(700, 550);
         MinimumSize = new Size(500, 400);
         BackColor = Color.FromArgb(30, 30, 46);
@@ -183,5 +184,26 @@ public class ChatWindow : Form
             _client.Dispose();
             base.OnFormClosing(e);
         }
+    }
+
+    private static Icon CreateSmileyIcon()
+    {
+        using var bmp = new Bitmap(32, 32);
+        using var g = Graphics.FromImage(bmp);
+        g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+
+        var yellow = Color.FromArgb(255, 255, 0);
+        var dark = Color.FromArgb(80, 80, 80);
+
+        g.FillEllipse(new SolidBrush(yellow), 0, 0, 32, 32);
+        g.FillEllipse(new SolidBrush(dark), 8, 11, 5, 5);
+        g.FillEllipse(new SolidBrush(dark), 19, 11, 5, 5);
+
+        using var pen = new Pen(dark, 2);
+        var smile = new System.Drawing.Drawing2D.GraphicsPath();
+        smile.AddArc(8, 17, 16, 10, 200, -160);
+        g.DrawPath(pen, smile);
+
+        return Icon.FromHandle(bmp.GetHicon());
     }
 }
