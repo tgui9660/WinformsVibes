@@ -56,7 +56,7 @@ Titled "Fella - AI Helper" with a question mark icon (`SystemIcons.Question`). O
 #### AI Map Window (`GUI/AIMapWindow.cs`)
 Singleton chat window titled "AI Map Chat". Same UI pattern as ChatWindow (dark theme, Consolas 15f log, Segoe UI 16.5f input). Exposes `AskAsync(string message)` so other components can send messages programmatically. Assistant responses are green (vs gray in ChatWindow). Wired to the "Tell Me More!" button in the World Map tab — clicking it asks about the first city within a 5 mile radius of the selected coordinates.
 
-### OpenAI Chat Client (`OpenAIChatClient.cs`)
+### OpenAI Chat Client (`AI/OpenAIChatClient.cs`)
 Uses `HttpClient` with `System.Text.Json` to call the OpenAI `/chat/completions` endpoint. Takes `apiKey`, `model`, and optional `baseUrl` in the constructor. `ChatAsync` accepts an optional `systemPrompt` parameter (defaults to "You are a helpful assistant."). No external NuGet packages required. Implements `IDisposable` to clean up the HttpClient.
 
 ### Database (`DbConfig.cs`)

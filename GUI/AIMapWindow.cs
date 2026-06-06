@@ -1,6 +1,7 @@
 using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using WinformsVibes.AI;
 
 namespace WinformsVibes.GUI;
 
