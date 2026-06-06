@@ -6,7 +6,7 @@ using NHibernate;
 using WinformsVibes.GUI;
 using WinformsVibes.Models;
 
-namespace WinformsVibes;
+namespace WinformsVibes.Database;
 
 public static class DbConfig
 {

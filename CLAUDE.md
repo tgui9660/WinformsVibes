@@ -59,7 +59,10 @@ Singleton chat window titled "AI Map Chat". Same UI pattern as ChatWindow (dark 
 ### OpenAI Chat Client (`AI/OpenAIChatClient.cs`)
 Uses `HttpClient` with `System.Text.Json` to call the OpenAI `/chat/completions` endpoint. Takes `apiKey`, `model`, and optional `baseUrl` in the constructor. `ChatAsync` accepts an optional `systemPrompt` parameter (defaults to "You are a helpful assistant."). No external NuGet packages required. Implements `IDisposable` to clean up the HttpClient.
 
-### Database (`DbConfig.cs`)
+### Database (`Database/`)
+Database access layer under namespace `WinformsVibes.Database`.
+
+#### DbConfig (`Database/DbConfig.cs`)
 Fluent NHibernate config connecting to a local SQL Server. Connection details are loaded via `DbSettingsManager.Load()` from `dbconfig.json`.
 
 - `CheckConnection()` — tests if the configured database is reachable
@@ -69,7 +72,7 @@ Fluent NHibernate config connecting to a local SQL Server. Connection details ar
 - `GetHelpTopics()` — returns a list of `HelpTopic` records for the HelpWindow
 - `SyncHelpTopics()` — truncates HelpInfo and re-seeds from HelpTopics.xml on every launch (XML is the source of truth)
 
-#### Settings (`DbSettings.cs`)
+#### DbSettings (`Database/DbSettings.cs`)
 `DbSettings` POCO with Server, DatabaseName, UserId, Password properties. `DbSettingsManager` reads/writes `dbconfig.json` from the output directory using `System.Text.Json`. If the file is missing, returns a `DbSettings` with defaults (`localhost`/`winformsvibes`/`sa`/`password`).
 
 #### Config File (`dbconfig.json`)

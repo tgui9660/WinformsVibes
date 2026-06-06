@@ -1,4 +1,5 @@
 using System.Windows.Forms;
+using WinformsVibes.Database;
 using WinformsVibes.GUI;
 
 namespace WinformsVibes;

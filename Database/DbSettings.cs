@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace WinformsVibes;
+namespace WinformsVibes.Database;
 
 public class DbSettings
 {
