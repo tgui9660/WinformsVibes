@@ -128,7 +128,7 @@ public class SplashScreen : Form
             Font = new Font("Segoe UI", 10f),
             Location = new Point(300, 10),
             Size = new Size(80, 30),
-            BackColor = Color.FromArgb(40, 40, 55),
+            BackColor = Color.FromArgb(70, 70, 90),
             ForeColor = Color.WhiteSmoke,
             FlatStyle = FlatStyle.Flat,
         };
