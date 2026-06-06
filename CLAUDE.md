@@ -39,7 +39,7 @@ All UI forms live here under namespace `WinformsVibes.GUI`.
 Dark-themed dialog shown when no database connection is available. Inputs for Server (defaults to `localhost`), Database (required, no default), Username (defaults to `sa`), and Password (masked with `UseSystemPasswordChar`). Exposes `Server`, `DatabaseName`, `UserId`, and `Password` properties. Pressing Enter in any field submits; Escape cancels.
 
 #### Splash Screen (`GUI/SplashScreen.cs`)
-FixedDialog form with a dark theme that displays application info (name, version, author, framework, database) fetched from the database. User clicks the X to close and proceed.
+FixedDialog form with a dark theme that displays application info (name, version, author, framework, database, server, user) fetched from the database. A bottom toolbar contains a right-aligned "Continue" button. Clicking the button or the X closes the splash and proceeds to the main form.
 
 #### Main Form (`GUI/MainForm.cs`)
 Extends `MaterialForm` from ReaLTaiizor (Material Design form base). Single-form application with:
@@ -71,8 +71,10 @@ Database access layer under namespace `WinformsVibes.Database`.
 Fluent NHibernate config connecting to a local SQL Server. Connection details are loaded via `DbSettingsManager.Load()` from `dbconfig.json`.
 
 - `CheckConnection()` — tests if the configured database is reachable
-- `CreateAndSeedDatabase(name, out errorMessage)` — creates the database, the `ApplicationInfo` and `HelpInfo` tables, seeds `ApplicationInfo` with default app data, and seeds `HelpInfo` from `HelpTopics.xml`. Resets `_sessionFactory` so subsequent calls use the new connection.
+- `CreateAndSeedDatabase(server, name, userId, password, out errorMessage)` — creates the database, the `ApplicationInfo` and `HelpInfo` tables, seeds `ApplicationInfo` with default app data, and seeds `HelpInfo` from `HelpTopics.xml`. Updates `_settings` with all four connection details and saves to `dbconfig.json`. Resets `_sessionFactory` so subsequent calls use the new connection.
 - `CurrentDatabaseName` — exposes the active database name for display on the splash screen
+- `CurrentServer` — exposes the active server for display on the splash screen
+- `CurrentUserId` — exposes the active user ID for display on the splash screen
 - `GetApplicationInfo()` — queries the single ApplicationInfo row
 - `GetHelpTopics()` — returns a list of `HelpTopic` records for the HelpWindow
 - `SyncHelpTopics()` — truncates HelpInfo and re-seeds from HelpTopics.xml on every launch (XML is the source of truth)
@@ -87,7 +89,7 @@ Created automatically in the output directory (`bin/Debug/net10.0-windows/`) whe
 - `ApplicationInfo` (`Models/ApplicationInfo.cs`) — mapped by `ApplicationInfoMap` (`Maps/ApplicationInfoMap.cs`)
 - `HelpInfo` (`Models/HelpInfo.cs`) — mapped by `HelpInfoMap` (`Maps/HelpInfoMap.cs`)
 - Proxy validation and lazy loading are disabled
-- `ApplicationInfo.DatabaseName` is **not mapped** to the database — set at runtime for display purposes
+- `ApplicationInfo.DatabaseName`, `Server`, and `UserId` are **not mapped** to the database — set at runtime for display purposes
 
 #### Help Topics (`HelpTopics.xml`)
 XML file (copied to output on build) that defines the help topics seeded into the `HelpInfo` table. Each `<Topic>` element has `Category` and `Name` attributes and text content. Edit this file to change the help content. On every launch, `SyncHelpTopics()` truncates HelpInfo and re-seeds from the XML — the XML is the single source of truth.

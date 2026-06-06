@@ -10,10 +10,11 @@ A Windows Forms desktop application built with .NET 10.0, featuring a splash scr
 - **Main Form** — menu bar with File, Edit, View, Chat, Settings, and Help menus
 - **World Map** — embedded Google Maps via WebView2 (Chromium-based)
 - **Live Clock** — status bar clock that updates every second
-- **Database Setup** — first-run wizard that creates and configures a SQL Server database automatically
+- **Database Setup** — first-run wizard with inputs for server, database name, username, and password
 - **Help Topics** — browsable help content covering project structure, GUI features, and usage
 - **AI Chat** — chat with a local LLM via Chat > AI Chat
 - **Fella - AI Helper** — context-aware help assistant that uses HelpInfo data to answer questions (Help > AI Help). Title bar shows a question mark icon and displays a red welcome message.
+- **AI Map Chat** — singleton chat window opened by the "Tell Me More!" button. Exposes `AskAsync(string message)` for programmatic use. Assistant responses are green.
 - **Help Sync** — HelpInfo table is automatically synced with HelpTopics.xml on every launch
 - **Build Release** — BuildRelease.bat publishes a release to a timestamped folder under Releases/
 
@@ -52,6 +53,7 @@ A Windows Forms desktop application built with .NET 10.0, featuring a splash scr
 | `DbSettings.cs` | Connection settings model and JSON config manager |
 | `ChatWindow.cs` | AI chat window connecting to local OpenAI-compatible endpoint |
 | `AIHelpWindow.cs` | AI-powered help assistant using HelpInfo context |
+| `AIMapWindow.cs` | Singleton map chat window with `AskAsync` for programmatic use |
 | `OpenAIChatClient.cs` | HttpClient-based OpenAI chat completions client |
 | `HelpWindow.cs` | Browsable help topics window — groups by unique Category+Topic, shows all content values |
 | `Models/` | Entity models (`ApplicationInfo`, `HelpInfo`) |
@@ -62,11 +64,11 @@ A Windows Forms desktop application built with .NET 10.0, featuring a splash scr
 
 ## Configuration
 
-The active database connection is stored in `dbconfig.json` (created automatically in the output directory). Edit the `DatabaseName` field to switch databases, or delete the file to trigger the setup dialog on next launch.
+The active database connection is stored in `dbconfig.json` (created automatically in the output directory). It contains `Server`, `DatabaseName`, `UserId`, and `Password` fields. Edit `DatabaseName` to switch databases, or delete the file to trigger the setup dialog on next launch.
 
 ## Help Topics
 
-Edit `HelpTopics.xml` to add, remove, or modify help topics. On every launch, the app compares the row count in the HelpInfo table with the number of `<Topic>` elements in the XML. If they differ, the table is truncated and re-seeded from the XML.
+Edit `HelpTopics.xml` to add, remove, or modify help topics. On every launch, the HelpInfo table is truncated and re-seeded from the XML — the XML is the single source of truth.
 
 ## Dependencies
 
@@ -74,6 +76,11 @@ Edit `HelpTopics.xml` to add, remove, or modify help topics. On every launch, th
 - **Microsoft.Web.WebView2** v1.0.3967.48 — Chromium-based web rendering
 - **ReaLTaiizor** v3.8.1.8 — Material Design controls for WinForms
 - **System.Data.SqlClient** v4.8.6 — SQL Server data access
+
+## Known Issues
+
+- WindowsBase version conflict warning (MSB3277) from WebView2 referencing net5.0 assemblies against net10.0 — harmless, safe to ignore
+- Running via `dotnet run` in Git Bash exits immediately because the GUI detaches from the shell. Use `RunMe.bat` or the compiled `.exe` directly.
 
 ## TODO
 
