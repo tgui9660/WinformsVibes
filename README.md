@@ -6,7 +6,7 @@ A Windows Forms desktop application built with .NET 10.0, featuring a splash scr
 
 ## Features
 
-- **Splash Screen** — displays application info (name, version, author, framework, database) fetched from the database
+- **Splash Screen** — displays application info (name, version, author, framework, database, server, user) fetched from the database. Bottom toolbar with a right-aligned Continue button to proceed.
 - **Main Form** — menu bar with File, Edit, View, Chat, Settings, and Help menus
 - **World Map** — embedded Google Maps via WebView2 (Chromium-based)
 - **Live Clock** — status bar clock that updates every second
@@ -36,7 +36,7 @@ A Windows Forms desktop application built with .NET 10.0, featuring a splash scr
    ```
    Or double-click `RunMe.bat` to build and launch directly.
 
-3. **First Launch** — if no database is configured, a setup dialog appears. Enter a database name and click **Create**. The app handles the rest.
+3. **First Launch** — if no database is configured, a setup dialog appears. Enter server, database name, username, and password, then click **Create** (or press Enter). The app handles the rest.
 
 4. **Build a Release** — run `BuildRelease.bat` to publish a distributable release to `Releases/Build-{timestamp}/`.
 

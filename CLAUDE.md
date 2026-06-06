@@ -36,7 +36,7 @@ dotnet run --project WinformsVibes.csproj
 All UI forms live here under namespace `WinformsVibes.GUI`.
 
 #### Database Setup Dialog (`GUI/DatabaseSetupDialog.cs`)
-Dark-themed dialog shown when no database connection is available. User enters a database name, clicks Create, and the app creates the database, tables, and seed data. Pressing Enter submits; Escape cancels.
+Dark-themed dialog shown when no database connection is available. Inputs for Server (defaults to `localhost`), Database (required, no default), Username (defaults to `sa`), and Password (masked with `UseSystemPasswordChar`). Exposes `Server`, `DatabaseName`, `UserId`, and `Password` properties. Pressing Enter in any field submits; Escape cancels.
 
 #### Splash Screen (`GUI/SplashScreen.cs`)
 FixedDialog form with a dark theme that displays application info (name, version, author, framework, database) fetched from the database. User clicks the X to close and proceed.
