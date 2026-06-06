@@ -17,6 +17,9 @@ public class AIHelpWindow : Form
     private readonly TextBox _inputBox;
     private readonly Button _sendButton;
     private readonly OpenAIChatClient _client;
+    private readonly System.Windows.Forms.Timer _thinkingTimer;
+    private int _thinkingStartIndex;
+    private int _thinkingDotCount;
 
     public static AIHelpWindow GetInstance()
     {
@@ -36,6 +39,17 @@ public class AIHelpWindow : Form
 
         _client = new OpenAIChatClient(ApiKey, Model);
         _helpTopics = DbConfig.GetHelpTopics();
+
+        _thinkingTimer = new System.Windows.Forms.Timer { Interval = 400 };
+        _thinkingTimer.Tick += (_, _) =>
+        {
+            _thinkingDotCount = (_thinkingDotCount + 1) % 4;
+            var dots = new string('.', _thinkingDotCount);
+            var text = $"Thinking{dots}";
+            _chatLog.Select(_thinkingStartIndex, 12);
+            _chatLog.SelectedText = text;
+            _chatLog.ScrollToCaret();
+        };
 
         var panel = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(30, 30, 46) };
 
@@ -112,16 +126,21 @@ public class AIHelpWindow : Form
         _inputBox.Clear();
         AppendUser(message);
         var rtfBeforePlaceholder = _chatLog.Rtf;
+        _thinkingStartIndex = _chatLog.TextLength;
         AppendSystem("Thinking...");
+        _thinkingDotCount = 0;
+        _thinkingTimer.Start();
 
         try
         {
             var reply = await _client.ChatAsync(message, BuildSystemPrompt());
+            _thinkingTimer.Stop();
             _chatLog.Rtf = rtfBeforePlaceholder;
             AppendAssistant(reply);
         }
         catch (Exception ex)
         {
+            _thinkingTimer.Stop();
             _chatLog.Rtf = rtfBeforePlaceholder;
             AppendSystem($"Error: {ex.Message}");
         }
