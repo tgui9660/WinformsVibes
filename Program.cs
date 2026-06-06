@@ -41,6 +41,8 @@ internal static class Program
         // Show splash screen — waits for user to click it to close
         var info = DbConfig.GetApplicationInfo() ?? new();
         info.DatabaseName = DbConfig.CurrentDatabaseName;
+        info.Server = DbConfig.CurrentServer;
+        info.UserId = DbConfig.CurrentUserId;
         var splash = new SplashScreen(info);
         Application.Run(splash);
 

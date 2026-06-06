@@ -14,6 +14,8 @@ public static class DbConfig
     private static ISessionFactory? _sessionFactory;
 
     public static string CurrentDatabaseName => _settings.DatabaseName;
+    public static string CurrentServer => _settings.Server;
+    public static string CurrentUserId => _settings.UserId;
 
     private static string ConnectionString =>
         $"Server={_settings.Server};Database={_settings.DatabaseName};User Id={_settings.UserId};Password={_settings.Password};";

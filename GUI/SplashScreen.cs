@@ -13,7 +13,7 @@ public class SplashScreen : Form
         this.MaximizeBox = false;
         this.MinimizeBox = false;
         this.BackColor = Color.FromArgb(30, 30, 46);
-        this.Size = new Size(420, 350);
+        this.Size = new Size(420, 390);
         this.DoubleBuffered = true;
 
         var panel = new Panel
@@ -72,12 +72,32 @@ public class SplashScreen : Form
             AutoSize = false,
         };
 
+        var server = new Label
+        {
+            Text = $"Server: {info.Server}",
+            Font = new Font("Segoe UI", 10f),
+            ForeColor = Color.LightGray,
+            Location = new Point(20, 180),
+            Size = new Size(380, 20),
+            AutoSize = false,
+        };
+
+        var username = new Label
+        {
+            Text = $"User: {info.UserId}",
+            Font = new Font("Segoe UI", 10f),
+            ForeColor = Color.LightGray,
+            Location = new Point(20, 205),
+            Size = new Size(380, 20),
+            AutoSize = false,
+        };
+
         var separator = new Label
         {
             Text = new string('─', 58),
             Font = new Font("Segoe UI", 8f),
             ForeColor = Color.FromArgb(70, 70, 90),
-            Location = new Point(20, 180),
+            Location = new Point(20, 230),
             Size = new Size(380, 15),
             AutoSize = false,
         };
@@ -92,7 +112,7 @@ public class SplashScreen : Form
             AutoSize = false,
         };
 
-        panel.Controls.AddRange(new Control[] { title, version, author, framework, database, separator, loading });
+        panel.Controls.AddRange(new Control[] { title, version, author, framework, database, server, username, separator, loading });
         this.Controls.Add(panel);
 
         this.Text = info.ApplicationName;

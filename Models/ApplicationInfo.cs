@@ -14,4 +14,6 @@ public class ApplicationInfo
 
     // Not mapped — set at runtime for display purposes
     public string DatabaseName { get; set; } = string.Empty;
+    public string Server { get; set; } = string.Empty;
+    public string UserId { get; set; } = string.Empty;
 }
