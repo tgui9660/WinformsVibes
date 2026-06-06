@@ -102,17 +102,7 @@ public class SplashScreen : Form
             AutoSize = false,
         };
 
-        var loading = new Label
-        {
-            Text = "Loading...",
-            Font = new Font("Segoe UI", 10f, FontStyle.Italic),
-            ForeColor = Color.Gray,
-            Location = new Point(20, 255),
-            Size = new Size(380, 20),
-            AutoSize = false,
-        };
-
-        mainPanel.Controls.AddRange(new Control[] { title, version, author, framework, database, server, username, separator, loading });
+        mainPanel.Controls.AddRange(new Control[] { title, version, author, framework, database, server, username, separator });
 
         // --- Bottom toolbar ---
         var toolbar = new Panel
