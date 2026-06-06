@@ -16,7 +16,7 @@ public class SplashScreen : Form
         this.Size = new Size(420, 390);
         this.DoubleBuffered = true;
 
-        var panel = new Panel
+        var mainPanel = new Panel
         {
             Dock = DockStyle.Fill,
             BackColor = Color.FromArgb(30, 30, 46),
@@ -107,16 +107,26 @@ public class SplashScreen : Form
             Text = "Loading...",
             Font = new Font("Segoe UI", 10f, FontStyle.Italic),
             ForeColor = Color.Gray,
-            Location = new Point(20, this.Height - 70),
+            Location = new Point(20, 255),
             Size = new Size(380, 20),
             AutoSize = false,
+        };
+
+        mainPanel.Controls.AddRange(new Control[] { title, version, author, framework, database, server, username, separator, loading });
+
+        // --- Bottom toolbar ---
+        var toolbar = new Panel
+        {
+            Dock = DockStyle.Bottom,
+            Height = 50,
+            BackColor = Color.FromArgb(35, 35, 50),
         };
 
         var continueBtn = new Button
         {
             Text = "Continue",
             Font = new Font("Segoe UI", 10f),
-            Location = new Point(170, this.Height - 50),
+            Location = new Point(300, 10),
             Size = new Size(80, 30),
             BackColor = Color.FromArgb(40, 40, 55),
             ForeColor = Color.WhiteSmoke,
@@ -125,8 +135,9 @@ public class SplashScreen : Form
         continueBtn.FlatAppearance.BorderSize = 0;
         continueBtn.Click += (_, _) => this.Close();
 
-        panel.Controls.AddRange(new Control[] { title, version, author, framework, database, server, username, separator, loading, continueBtn });
-        this.Controls.Add(panel);
+        toolbar.Controls.Add(continueBtn);
+        this.Controls.Add(mainPanel);
+        this.Controls.Add(toolbar);
 
         this.Text = info.ApplicationName;
     }
