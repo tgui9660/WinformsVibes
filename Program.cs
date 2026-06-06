@@ -25,7 +25,7 @@ internal static class Program
                 return;
             }
 
-            if (!DbConfig.CreateAndSeedDatabase(setup.DatabaseName, out var err))
+            if (!DbConfig.CreateAndSeedDatabase(setup.Server ?? "localhost", setup.DatabaseName, setup.UserId ?? "sa", setup.Password ?? "", out var err))
             {
                 MessageBox.Show($"Failed to create the database: {err}",
                     "Database Error",

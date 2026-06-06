@@ -92,7 +92,7 @@ public static class DbConfig
         }
     }
 
-    public static bool CreateAndSeedDatabase(string databaseName, out string errorMessage)
+    public static bool CreateAndSeedDatabase(string server, string databaseName, string userId, string password, out string errorMessage)
     {
         try
         {
@@ -105,8 +105,11 @@ public static class DbConfig
                 cmd.ExecuteNonQuery();
             }
 
-            // Update settings with the new database name
+            // Update settings with the new connection details
+            _settings.Server = server;
             _settings.DatabaseName = databaseName;
+            _settings.UserId = userId;
+            _settings.Password = password;
             DbSettingsManager.Save(_settings);
 
             // Create the table and seed data
