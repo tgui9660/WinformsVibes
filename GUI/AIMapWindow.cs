@@ -2,7 +2,7 @@ using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace WinformsVibes;
+namespace WinformsVibes.GUI;
 
 public class AIMapWindow : Form
 {

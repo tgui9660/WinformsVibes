@@ -5,7 +5,7 @@ using System.Windows.Forms;
 using Microsoft.Web.WebView2.WinForms;
 using ReaLTaiizor.Forms;
 
-namespace WinformsVibes
+namespace WinformsVibes.GUI
 {
     class MainForm : MaterialForm
     {

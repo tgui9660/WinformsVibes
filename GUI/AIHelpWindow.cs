@@ -1,36 +1,39 @@
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace WinformsVibes;
+namespace WinformsVibes.GUI;
 
-public class ChatWindow : Form
+public class AIHelpWindow : Form
 {
     private const string ApiKey = "apikey";
     private const string Model = "Qwen3.6-27B-MTP-Q4_K_M";
 
-    private static ChatWindow? _instance;
+    private static AIHelpWindow? _instance;
 
+    private readonly List<HelpTopic> _helpTopics;
     private readonly RichTextBox _chatLog;
     private readonly TextBox _inputBox;
     private readonly Button _sendButton;
     private readonly OpenAIChatClient _client;
 
-    public static ChatWindow GetInstance()
+    public static AIHelpWindow GetInstance()
     {
-        _instance ??= new ChatWindow();
+        _instance ??= new AIHelpWindow();
         _instance.BringToFront();
         return _instance;
     }
 
-    private ChatWindow()
+    private AIHelpWindow()
     {
         StartPosition = FormStartPosition.CenterScreen;
-        Text = "AI Chat";
+        Text = "Fella - AI Helper";
+        Icon = SystemIcons.Question;
         Size = new Size(700, 550);
         MinimumSize = new Size(500, 400);
         BackColor = Color.FromArgb(30, 30, 46);
 
         _client = new OpenAIChatClient(ApiKey, Model);
+        _helpTopics = DbConfig.GetHelpTopics();
 
         var panel = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(30, 30, 46) };
 
@@ -93,6 +96,9 @@ public class ChatWindow : Form
         Controls.Add(panel);
 
         AppendSystem($"Connected to {Model} at http://192.168.2.15:8888/v1");
+        _chatLog.SelectionColor = Color.Red;
+        _chatLog.AppendText("Welcome to Fella! Your helpful AI dude.\n");
+        _chatLog.ScrollToCaret();
         _inputBox.Focus();
     }
 
@@ -108,7 +114,7 @@ public class ChatWindow : Form
 
         try
         {
-            var reply = await _client.ChatAsync(message);
+            var reply = await _client.ChatAsync(message, BuildSystemPrompt());
             _chatLog.Rtf = rtfBeforePlaceholder;
             AppendAssistant(reply);
         }
@@ -117,6 +123,19 @@ public class ChatWindow : Form
             _chatLog.Rtf = rtfBeforePlaceholder;
             AppendSystem($"Error: {ex.Message}");
         }
+    }
+
+    private string BuildSystemPrompt()
+    {
+        var sb = new System.Text.StringBuilder();
+        sb.Append("You are a helpful assistant for the Winforms Vibes application. ");
+        sb.Append("Use the following help topics to answer user questions. ");
+        sb.Append("If a question isn't covered by these topics, do your best to help.\n\n");
+        foreach (var topic in _helpTopics)
+        {
+            sb.Append($"[{topic.Category}] {topic.Topic}:\n{topic.Content}\n\n");
+        }
+        return sb.ToString();
     }
 
     private void OnInputKeyDown(object? sender, KeyEventArgs e)

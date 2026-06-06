@@ -27,13 +27,16 @@ dotnet run --project WinformsVibes.csproj
 ### Entry Point
 `Program.cs` — checks database connectivity. If unreachable, shows the database setup dialog (`DatabaseSetupDialog`). On success, syncs HelpInfo with HelpTopics.xml via `DbConfig.SyncHelpTopics()`, shows the splash screen (`Application.Run(splash)`), then launches the main form after the splash is closed (`Application.Run(new MainForm())`).
 
-### Database Setup Dialog (`DatabaseSetupDialog.cs`)
+### GUI (`GUI/`)
+All UI forms live here under namespace `WinformsVibes.GUI`.
+
+#### Database Setup Dialog (`GUI/DatabaseSetupDialog.cs`)
 Dark-themed dialog shown when no database connection is available. User enters a database name, clicks Create, and the app creates the database, tables, and seed data. Pressing Enter submits; Escape cancels.
 
-### Splash Screen (`SplashScreen.cs`)
+#### Splash Screen (`GUI/SplashScreen.cs`)
 FixedDialog form with a dark theme that displays application info (name, version, author, framework, database) fetched from the database. User clicks the X to close and proceed.
 
-### Main Form (`MainForm.cs`)
+#### Main Form (`GUI/MainForm.cs`)
 Extends `MaterialForm` from ReaLTaiizor (Material Design form base). Single-form application with:
 - **MenuStrip** — File (New, Open, Save, Exit), Edit (Copy, Paste), View (Toggle Fullscreen, About), Settings (Preferences), Chat (AI Chat), Help (Contents, AI Help, About)
 - **TabControl** — one tab:
@@ -41,16 +44,16 @@ Extends `MaterialForm` from ReaLTaiizor (Material Design form base). Single-form
 - **StatusStrip** — "Ready" label at bottom, live clock updated by a 1-second `System.Windows.Forms.Timer`
 - **Icon** — procedurally drawn bear face via `CreateBearIcon()`
 
-### Help Window (`HelpWindow.cs`)
-Dark-themed window opened via Help > Contents. Groups help topics by unique Category+Topic pairs and displays all content values when selected. Search filters across category, topic name, and all content values. Uses `GroupedHelpTopic` record with a `List<string>` of contents.
+#### Help Window (`GUI/HelpWindow.cs`)
+Dark-themed window opened via Help > Contents. Groups help topics by unique Category+Topic pairs and displays all content values when selected. Search filters across category, topic name, and all content values. Uses `GroupedHelpTopic` record with a `List<string>` of contents. Also defines the `HelpTopic` record used by `DbConfig.GetHelpTopics()`.
 
-### AI Chat Window (`ChatWindow.cs`)
+#### AI Chat Window (`GUI/ChatWindow.cs`)
 Singleton window opened via Chat > AI Chat. Connects to an OpenAI-compatible endpoint at `http://192.168.2.15:8888/v1` using the `OpenAIChatClient`. API key (`"apikey"`) and model (`"Qwen3.6-27B-MTP-Q4_K_M"`) are hardcoded. Clicking X hides the window rather than closing it, preserving chat history across open/close cycles. User messages are displayed in blue and retain formatting via RTF preservation when removing the "Thinking..." placeholder. Chat log uses Consolas 15f, input and send button use Segoe UI 16.5f with matching explicit heights.
 
-### AI Help Window (`AIHelpWindow.cs`)
+#### AI Help Window (`GUI/AIHelpWindow.cs`)
 Titled "Fella - AI Helper" with a question mark icon (`SystemIcons.Question`). Opened via Help > AI Help. Same singleton pattern, hides on close, preserves chat history. Uses same font sizes and layout as ChatWindow. Displays a red welcome message: "Welcome to Fella! Your helpful AI dude." Loads all HelpInfo topics from the database at startup and includes them in the system prompt so the AI can answer questions based on actual help content.
 
-### AI Map Window (`AIMapWindow.cs`)
+#### AI Map Window (`GUI/AIMapWindow.cs`)
 Singleton chat window titled "AI Map Chat". Same UI pattern as ChatWindow (dark theme, Consolas 15f log, Segoe UI 16.5f input). Exposes `AskAsync(string message)` so other components can send messages programmatically. Assistant responses are green (vs gray in ChatWindow). Wired to the "Tell Me More!" button in the World Map tab — clicking it asks about the first city within a 5 mile radius of the selected coordinates.
 
 ### OpenAI Chat Client (`OpenAIChatClient.cs`)

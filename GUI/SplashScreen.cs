@@ -2,7 +2,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using WinformsVibes.Models;
 
-namespace WinformsVibes;
+namespace WinformsVibes.GUI;
 
 public class SplashScreen : Form
 {

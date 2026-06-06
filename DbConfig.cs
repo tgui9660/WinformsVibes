@@ -3,6 +3,7 @@ using System.Xml.Linq;
 using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
 using NHibernate;
+using WinformsVibes.GUI;
 using WinformsVibes.Models;
 
 namespace WinformsVibes;
