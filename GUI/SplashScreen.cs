@@ -107,12 +107,25 @@ public class SplashScreen : Form
             Text = "Loading...",
             Font = new Font("Segoe UI", 10f, FontStyle.Italic),
             ForeColor = Color.Gray,
-            Location = new Point(20, this.Height - 40),
+            Location = new Point(20, this.Height - 70),
             Size = new Size(380, 20),
             AutoSize = false,
         };
 
-        panel.Controls.AddRange(new Control[] { title, version, author, framework, database, server, username, separator, loading });
+        var continueBtn = new Button
+        {
+            Text = "Continue",
+            Font = new Font("Segoe UI", 10f),
+            Location = new Point(170, this.Height - 50),
+            Size = new Size(80, 30),
+            BackColor = Color.FromArgb(40, 40, 55),
+            ForeColor = Color.WhiteSmoke,
+            FlatStyle = FlatStyle.Flat,
+        };
+        continueBtn.FlatAppearance.BorderSize = 0;
+        continueBtn.Click += (_, _) => this.Close();
+
+        panel.Controls.AddRange(new Control[] { title, version, author, framework, database, server, username, separator, loading, continueBtn });
         this.Controls.Add(panel);
 
         this.Text = info.ApplicationName;
