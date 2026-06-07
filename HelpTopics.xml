@@ -13,7 +13,7 @@
     A BuildRelease.bat script is provided to produce a distributable release. It publishes the project in Release mode for win-x64 and outputs to a timestamped folder under Releases/ (e.g., Releases/Build-20260606_120000).
   </Topic>
   <Topic Category="GUI Features" Name="Splash Screen">
-    Shown at startup. Displays application info (name, version, author, framework, database) fetched from the database. A loading indicator is shown at the bottom. Click the close button (X) to dismiss and proceed to the main form.
+    Shown at startup. Displays application info (name, version, author, framework, database, server, user) fetched from the database. A bottom toolbar contains a right-aligned "Continue" button. Clicking the button or the close button (X) dismisses the splash and proceeds to the main form.
   </Topic>
   <Topic Category="GUI Features" Name="Main Form">
     Single-form application that opens maximized. Features a MenuStrip, a StatusStrip with a live clock, and a TabControl. The app icon is a procedurally drawn bear face. The main tab is the World Map, which embeds Google Maps via WebView2.

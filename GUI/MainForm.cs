@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Web.WebView2.WinForms;
 using ReaLTaiizor.Forms;
+using ReaLTaiizor.Controls;
 
 namespace WinformsVibes.GUI
 {
@@ -89,50 +90,54 @@ namespace WinformsVibes.GUI
             // Google Maps World View
             var mapTab = new System.Windows.Forms.TabPage("World Map");
 
-            var coordPanel = new Panel
+            var coordPanel = new System.Windows.Forms.Panel
             {
                 Dock = DockStyle.Bottom,
-                Height = 36,
-                Padding = new Padding(8, 4, 8, 4),
+                Height = 86,
+                Padding = new Padding(16, 8, 16, 8),
             };
 
-            var latLabel = new Label
+            var latLabel = new MaterialLabel
             {
                 Text = "Lat",
-                ForeColor = Color.Black,
-                Location = new Point(8, 6),
-                AutoSize = true,
+                Location = new Point(36, 24),
+                Size = new Size(36, 30),
+                Font = new Font(Font.FontFamily, 16f),
             };
 
-            var latInput = new TextBox
+            var latInput = new MaterialTextBox
             {
                 Text = "0",
-                Location = new Point(36, 4),
-                Size = new Size(80, 24),
+                Location = new Point(76, 8),
+                Size = new Size(160, 62),
+                Font = new Font(Font.FontFamily, 16f),
             };
+            latInput.Region = CreateRoundedRegion(latInput.Size, 16);
 
-            var longLabel = new Label
+            var longLabel = new MaterialLabel
             {
                 Text = "Long",
-                ForeColor = Color.Black,
-                Location = new Point(124, 6),
-                AutoSize = true,
+                Location = new Point(284, 24),
+                Size = new Size(36, 30),
+                Font = new Font(Font.FontFamily, 16f),
             };
 
-            var longInput = new TextBox
+            var longInput = new MaterialTextBox
             {
                 Text = "0",
-                Location = new Point(160, 4),
-                Size = new Size(80, 24),
+                Location = new Point(324, 8),
+                Size = new Size(160, 62),
+                Font = new Font(Font.FontFamily, 16f),
             };
+            longInput.Region = CreateRoundedRegion(longInput.Size, 16);
 
-            var tellMeMoreButton = new Button
+            var tellMeMoreButton = new MaterialButton
             {
                 Text = "Tell Me More!",
-                Location = new Point(248, 3),
-                Size = new Size(100, 24),
-                FlatStyle = FlatStyle.Flat,
+                Location = new Point(496, 11),
+                Size = new Size(200, 62),
                 Enabled = false,
+                Font = new Font(Font.FontFamily, 16f),
             };
 
             coordPanel.Controls.AddRange(new Control[] { latLabel, latInput, longLabel, longInput, tellMeMoreButton });
@@ -165,7 +170,7 @@ namespace WinformsVibes.GUI
                 MessageBoxIcon.Information);
         }
 
-        private async void InitializeMapAsync(WebView2 webView, TextBox latInput, TextBox longInput, Button tellMeMoreButton)
+        private async void InitializeMapAsync(WebView2 webView, MaterialTextBox latInput, MaterialTextBox longInput, MaterialButton tellMeMoreButton)
         {
             await webView.EnsureCoreWebView2Async();
             webView.CoreWebView2.Navigate("https://www.google.com/maps/@0,0,2z");
@@ -250,6 +255,18 @@ namespace WinformsVibes.GUI
             g.FillEllipse(new SolidBrush(Color.White), 21, 12, 1, 1);
 
             return Icon.FromHandle(bmp.GetHicon());
+        }
+
+        static Region CreateRoundedRegion(Size size, int radius)
+        {
+            var path = new System.Drawing.Drawing2D.GraphicsPath();
+            var d = radius * 2;
+            path.AddArc(0, 0, d, d, 180, 90);
+            path.AddArc(size.Width - d, 0, d, d, 270, 90);
+            path.AddArc(size.Width - d, size.Height - d, d, d, 0, 90);
+            path.AddArc(0, size.Height - d, d, d, 90, 90);
+            path.CloseFigure();
+            return new Region(path);
         }
     }
 }
