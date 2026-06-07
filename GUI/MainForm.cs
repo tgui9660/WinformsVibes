@@ -87,7 +87,11 @@ namespace WinformsVibes.GUI
             _menuStrip.Items.Add(helpMenu);
 
             // Status bar
-            _statusStrip = new CrownStatusStrip { Height = 40 };
+            _statusStrip = new CrownStatusStrip
+            {
+                Dock = DockStyle.Bottom,
+                Height = 40,
+            };
             _statusLabel = new ToolStripStatusLabel { Text = "Ready" };
             var spacer = new ToolStripStatusLabel { Spring = true };
             var timeLabel = new ToolStripStatusLabel

@@ -34,6 +34,8 @@ Tests are in `Tests/` under the `WinformsVibes.Tests.csproj` project, using NUni
 ```powershell
 # Run all tests
 dotnet test WinformsVibes.Tests.csproj
+# Or use the batch file (runs tests and pauses)
+.\RunTests.bat
 
 # Run a single test by name
 dotnet test WinformsVibes.Tests.csproj --filter "FullyQualifiedName~GetInstance_ReturnsSameInstanceOnRepeatedCalls"
@@ -53,7 +55,7 @@ The test project references `WinformsVibes.csproj` and excludes the main project
 All UI forms live here under namespace `WinformsVibes.GUI`.
 
 #### Database Setup Dialog (`GUI/DatabaseSetupDialog.cs`)
-Dark-themed dialog shown when no database connection is available. Inputs for Server (defaults to `localhost`), Database (required, no default), Username (defaults to `sa`), and Password (masked with `UseSystemPasswordChar`). Exposes `Server`, `DatabaseName`, `UserId`, and `Password` properties. Pressing Enter in any field submits; Escape cancels.
+Dark-themed dialog shown when no database connection is available. Four inputs: Server (defaults to `localhost`), Database (required, no default), Username (defaults to `sa`), and Password (masked with `UseSystemPasswordChar`). Focus lands on the Database field. Exposes `Server`, `DatabaseName`, `UserId`, and `Password` properties. Pressing Enter in any field submits; Escape cancels.
 
 #### Splash Screen (`GUI/SplashScreen.cs`)
 FixedDialog form with a dark theme that displays application info (name, version, author, framework, database, server, user) fetched from the database. A bottom toolbar contains a right-aligned "Continue" button. Clicking the button or the X closes the splash and proceeds to the main form.
@@ -70,13 +72,13 @@ Extends `MaterialForm` from ReaLTaiizor (Material Design form base). Single-form
 Dark-themed window opened via Help > Contents. Has a question mark icon (`SystemIcons.Question`). Groups help topics by unique Category+Topic pairs and displays all content values when selected. Search filters across category, topic name, and all content values. Uses `GroupedHelpTopic` record with a `List<string>` of contents. Also defines the `HelpTopic` record used by `DbConfig.GetHelpTopics()`.
 
 #### AI Chat Window (`GUI/ChatWindow.cs`)
-Singleton window opened via Chat > AI Chat. Has a yellow smiley face icon drawn via `CreateSmileyIcon()`. Connects to an OpenAI-compatible endpoint at `http://192.168.2.15:8888/v1` using the `OpenAIChatClient`. API key (`"apikey"`) and model (`"Qwen3.6-27B-MTP-Q4_K_M"`) are hardcoded. Clicking X hides the window rather than closing it, preserving chat history across open/close cycles. User messages are displayed in blue and retain formatting via RTF preservation when removing the "Thinking..." placeholder. Chat log uses Consolas 15f, input and send button use Segoe UI 16.5f with matching explicit heights.
+Singleton window opened via Chat > AI Chat. Has a yellow smiley face icon drawn via `CreateSmileyIcon()`. Connects to an OpenAI-compatible endpoint at `http://192.168.2.15:8888/v1` using the `OpenAIChatClient`. API key (`"apikey"`) and model (`"Qwen3.6-27B-MTP-Q4_K_M"`) are hardcoded. Clicking X hides the window rather than closing it, preserving chat history across open/close cycles. User messages are displayed in blue. Assistant responses have a yellow "Assistant:" label with green body text. System messages are gray. RTF is preserved when removing the "Thinking..." placeholder so user message formatting is retained. Chat log uses Consolas 15f, input and send button use Segoe UI 16.5f with matching explicit heights.
 
 #### AI Help Window (`GUI/AIHelpWindow.cs`)
 Titled "Fella - AI Helper" with a question mark icon (`SystemIcons.Question`). Opened via Help > AI Help. Same singleton pattern, hides on close, preserves chat history. Uses same font sizes and layout as ChatWindow. Displays a red welcome message: "Welcome to Fella! Your helpful AI dude." Loads all HelpInfo topics from the database at startup and includes them in the system prompt so the AI can answer questions based on actual help content.
 
 #### AI Map Window (`GUI/AIMapWindow.cs`)
-Singleton chat window titled "AI Map Chat". Same UI pattern as ChatWindow (dark theme, Consolas 15f log, Segoe UI 16.5f input). Exposes `AskAsync(string message)` so other components can send messages programmatically. Assistant responses are green (vs gray in ChatWindow). Wired to the "Tell Me More!" button in the World Map tab — clicking it asks about the first city within a 5 mile radius of the selected coordinates.
+Singleton chat window titled "AI Map Chat". Same UI pattern as ChatWindow (dark theme, Consolas 15f log, Segoe UI 16.5f input). Exposes `AskAsync(string message)` so other components can send messages programmatically. Assistant responses use the same yellow-label + green-body pattern as ChatWindow. Wired to the "Tell Me More!" button in the World Map tab — clicking it asks about the first city within a 5 mile radius of the selected coordinates.
 
 ### OpenAI Chat Client (`AI/OpenAIChatClient.cs`)
 Uses `HttpClient` with `System.Text.Json` to call the OpenAI `/chat/completions` endpoint. Takes `apiKey`, `model`, and optional `baseUrl` in the constructor. `ChatAsync` is `virtual` (accepts an optional `systemPrompt` parameter, defaults to "You are a helpful assistant.") to allow mocking in tests. No external NuGet packages required. Implements `IDisposable` to clean up the HttpClient.
@@ -111,9 +113,6 @@ Created automatically in the output directory (`bin/Debug/net10.0-windows/`) whe
 #### Help Topics (`HelpTopics.xml`)
 XML file (copied to output on build) that defines the help topics seeded into the `HelpInfo` table. Each `<Topic>` element has `Category` and `Name` attributes and text content. Edit this file to change the help content. On every launch, `SyncHelpTopics()` truncates HelpInfo and re-seeds from the XML — the XML is the single source of truth.
 
-#### Build Release (`BuildRelease.bat`)
-Publishes the project in Release mode for win-x64 and outputs to `Releases/Build-{timestamp}/` with a `YYYYMMDD_HHmmSS` timestamp. Framework-dependent build (not self-contained).
-
 ### WebView2 Initialization Pattern
 Critical: use `async void` with `await EnsureCoreWebView2Async()` before calling `CoreWebView2.Navigate()`. Do NOT use `ContinueWith` with async lambdas — the inner await is not tracked by the outer task, causing silent navigation failures.
 
@@ -134,3 +133,9 @@ ChatWindow, AIHelpWindow, and AIMapWindow use a static `_instance` field with `G
 
 - WindowsBase version conflict warning (MSB3277) from WebView2 referencing net5.0 assemblies against net10.0 — harmless, safe to ignore
 - Running via `dotnet run` in Git Bash exits immediately because the GUI detaches from the shell. Use `RunMe.bat` or the compiled `.exe` directly.
+- `WinformsVibes.slnx` is a minimal stub (`<Solution></Solution>`) — do not rely on it. Build via the `.csproj` files or batch scripts.
+- `Directory.Build.props` sets `obj\$(MSBuildProjectFile)\` per project to avoid MSBuild conflicts between the main and test projects.
+
+## Configuration
+
+The active database connection is stored in `dbconfig.json` (created automatically in the output directory). Edit `DatabaseName` to switch databases, or delete the file to trigger the setup dialog on next launch.
