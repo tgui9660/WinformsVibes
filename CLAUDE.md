@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working with this repository.
 
 ## Project Overview
 
@@ -27,6 +27,23 @@ dotnet run --project WinformsVibes.csproj
 .\bin\Debug\net10.0-windows\WinformsVibes.exe
 ```
 
+### Tests
+
+Tests are in `Tests/` under the `WinformsVibes.Tests.csproj` project, using NUnit 4.2.2.
+
+```powershell
+# Run all tests
+dotnet test WinformsVibes.Tests.csproj
+
+# Run a single test by name
+dotnet test WinformsVibes.Tests.csproj --filter "FullyQualifiedName~GetInstance_ReturnsSameInstanceOnRepeatedCalls"
+
+# Run tests in a test fixture
+dotnet test WinformsVibes.Tests.csproj --filter "FullyQualifiedName~ChatWindowTests"
+```
+
+The test project references `WinformsVibes.csproj` and excludes the main project's source files via `<Compile Remove>` to avoid CS0311/CS0436 conflicts. Tests use reflection to access private fields and methods, and a `MockChatClient` to test the chat flow without a live endpoint.
+
 ## Architecture
 
 ### Entry Point
@@ -43,10 +60,10 @@ FixedDialog form with a dark theme that displays application info (name, version
 
 #### Main Form (`GUI/MainForm.cs`)
 Extends `MaterialForm` from ReaLTaiizor (Material Design form base). Single-form application with:
-- **MenuStrip** — File (New, Open, Save, Exit), Edit (Copy, Paste), View (Toggle Fullscreen, About), Settings (Preferences), Chat (AI Chat), Help (Contents, AI Help, About)
+- **CrownMenuStrip** — ReaLTaiizor's material menu control with a custom `DarkMenuRenderer` (`ToolStripProfessionalRenderer` subclass with dark colors). Menus: File (New, Open, Save, Exit), Edit (Copy, Paste), View (Toggle Fullscreen, About), Settings (Preferences), Chat (AI Chat), Help (Contents, AI Help, About)
 - **TabControl** — one tab:
-  - **World Map** — WebView2 control loaded with Google Maps. A bottom coordPanel has Lat/Long TextBox inputs and a "Tell Me More!" button. Enter in a coord field navigates the map. The button opens the AIMapWindow and asks the agent about the first city within a 5 mile radius of the coordinates. `SourceChanged` event syncs the URL coordinates back into the Lat/Long inputs. Button is disabled when both coords are 0.
-- **StatusStrip** — "Ready" label at bottom, live clock updated by a 1-second `System.Windows.Forms.Timer`
+  - **World Map** — WebView2 control loaded with Google Maps. A bottom coordPanel has Lat/Long `MaterialTextBox` inputs with rounded regions and a `MaterialButton` "Tell Me More!" button. Enter in a coord field navigates the map. The button opens the AIMapWindow and asks the agent about the first city within a 5 mile radius of the coordinates. `SourceChanged` event syncs the URL coordinates back into the Lat/Long inputs. Button is disabled when both coords are 0.
+- **CrownStatusStrip** — "Ready" label at bottom, live clock updated by a 1-second `System.Windows.Forms.Timer`
 - **Icon** — procedurally drawn bear face via `CreateBearIcon()`
 
 #### Help Window (`GUI/HelpWindow.cs`)
@@ -62,7 +79,7 @@ Titled "Fella - AI Helper" with a question mark icon (`SystemIcons.Question`). O
 Singleton chat window titled "AI Map Chat". Same UI pattern as ChatWindow (dark theme, Consolas 15f log, Segoe UI 16.5f input). Exposes `AskAsync(string message)` so other components can send messages programmatically. Assistant responses are green (vs gray in ChatWindow). Wired to the "Tell Me More!" button in the World Map tab — clicking it asks about the first city within a 5 mile radius of the selected coordinates.
 
 ### OpenAI Chat Client (`AI/OpenAIChatClient.cs`)
-Uses `HttpClient` with `System.Text.Json` to call the OpenAI `/chat/completions` endpoint. Takes `apiKey`, `model`, and optional `baseUrl` in the constructor. `ChatAsync` accepts an optional `systemPrompt` parameter (defaults to "You are a helpful assistant."). No external NuGet packages required. Implements `IDisposable` to clean up the HttpClient.
+Uses `HttpClient` with `System.Text.Json` to call the OpenAI `/chat/completions` endpoint. Takes `apiKey`, `model`, and optional `baseUrl` in the constructor. `ChatAsync` is `virtual` (accepts an optional `systemPrompt` parameter, defaults to "You are a helpful assistant.") to allow mocking in tests. No external NuGet packages required. Implements `IDisposable` to clean up the HttpClient.
 
 ### Database (`Database/`)
 Database access layer under namespace `WinformsVibes.Database`.
