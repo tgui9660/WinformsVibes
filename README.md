@@ -84,4 +84,4 @@ Edit `HelpTopics.xml` to add, remove, or modify help topics. On every launch, th
 
 ## TODO
 
-- [ ] Validate HelpInfo data population on application start
+- [x] Validate HelpInfo data population on application start
