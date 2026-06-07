@@ -20,7 +20,7 @@ public class OpenAIChatClient
         _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
     }
 
-    public async Task<string> ChatAsync(string message, string systemPrompt = "You are a helpful assistant.")
+    public virtual async Task<string> ChatAsync(string message, string systemPrompt = "You are a helpful assistant.")
     {
         var payload = new
         {
