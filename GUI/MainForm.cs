@@ -109,14 +109,14 @@ namespace WinformsVibes.GUI
             var coordPanel = new System.Windows.Forms.Panel
             {
                 Dock = DockStyle.Bottom,
-                Height = 102,
-                Padding = new Padding(16, 12, 16, 12),
+                Height = 60,
+                Padding = new Padding(16, 6, 16, 6),
             };
 
             var latLabel = new MaterialLabel
             {
                 Text = "Lat",
-                Location = new Point(36, 38),
+                Location = new Point(36, 23),
                 Size = new Size(36, 30),
                 Font = new Font(Font.FontFamily, 16f),
             };
@@ -124,7 +124,7 @@ namespace WinformsVibes.GUI
             var latInput = new MaterialTextBox
             {
                 Text = "0",
-                Location = new Point(76, 12),
+                Location = new Point(76, 7),
                 Size = new Size(160, 62),
                 Font = new Font(Font.FontFamily, 16f),
             };
@@ -133,7 +133,7 @@ namespace WinformsVibes.GUI
             var longLabel = new MaterialLabel
             {
                 Text = "Long",
-                Location = new Point(284, 38),
+                Location = new Point(284, 23),
                 Size = new Size(36, 30),
                 Font = new Font(Font.FontFamily, 16f),
             };
@@ -141,7 +141,7 @@ namespace WinformsVibes.GUI
             var longInput = new MaterialTextBox
             {
                 Text = "0",
-                Location = new Point(324, 12),
+                Location = new Point(324, 7),
                 Size = new Size(160, 62),
                 Font = new Font(Font.FontFamily, 16f),
             };
@@ -150,7 +150,7 @@ namespace WinformsVibes.GUI
             var tellMeMoreButton = new MaterialButton
             {
                 Text = "Tell Me More!",
-                Location = new Point(496, 20),
+                Location = new Point(532, 10),
                 Size = new Size(200, 62),
                 Enabled = false,
                 Font = new Font(Font.FontFamily, 16f),

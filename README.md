@@ -49,7 +49,7 @@ A Windows Forms desktop application built with .NET 10.0, featuring a splash scr
 | `SplashScreen.cs` | Startup splash with application info |
 | `MainForm.cs` | Main application window with menu, tabs, and status bar |
 | `DatabaseSetupDialog.cs` | First-run database creation dialog |
-| `DbConfig.cs` | Database connection, Fluent NHibernate config, seed logic, help sync |
+| `DbConfig.cs` | Database connection, Fluent NHibernate config, `SchemaExport` for table creation, seed logic, help sync |
 | `DbSettings.cs` | Connection settings model and JSON config manager |
 | `ChatWindow.cs` | AI chat window connecting to local OpenAI-compatible endpoint |
 | `AIHelpWindow.cs` | AI-powered help assistant using HelpInfo context |
@@ -57,7 +57,7 @@ A Windows Forms desktop application built with .NET 10.0, featuring a splash scr
 | `OpenAIChatClient.cs` | HttpClient-based OpenAI chat completions client |
 | `HelpWindow.cs` | Browsable help topics window — groups by unique Category+Topic, shows all content values |
 | `Models/` | Entity models (`ApplicationInfo`, `HelpInfo`) |
-| `Maps/` | Fluent NHibernate maps (`ApplicationInfoMap`, `HelpInfoMap`) |
+| `Maps/` | Fluent NHibernate maps (`ApplicationInfoMap`, `HelpInfoMap`). `Content` and `Dependencies` columns use `nvarchar(max)` via `CustomSqlType` |
 | `HelpTopics.xml` | Help topics seeded into the database on creation and synced on every launch |
 | `RunMe.bat` | Batch file launcher — builds then launches the app |
 | `BuildRelease.bat` | Publishes a distributable release to `Releases/Build-{timestamp}/` |
@@ -81,6 +81,20 @@ Edit `HelpTopics.xml` to add, remove, or modify help topics. On every launch, th
 
 - WindowsBase version conflict warning (MSB3277) from WebView2 referencing net5.0 assemblies against net10.0 — harmless, safe to ignore
 - Running via `dotnet run` in Git Bash exits immediately because the GUI detaches from the shell. Use `RunMe.bat` or the compiled `.exe` directly.
+
+## Tests
+
+Tests are in `Tests/` under `WinformsVibes.Tests.csproj` (NUnit 4.2.2).
+
+```powershell
+# Run all tests
+dotnet test WinformsVibes.Tests.csproj
+
+# Run database tests (requires SQL Server connection)
+dotnet test WinformsVibes.Tests.csproj --filter "FullyQualifiedName~DatabaseTests"
+```
+
+`DatabaseTests` creates a test database (`testdb_schema`) and validates SchemaExport table creation and data seeding. A `OneTimeSetUp` drops the test database before each run to ensure a fresh schema.
 
 ## TODO
 

@@ -3,7 +3,9 @@ using System.Xml.Linq;
 using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
 using NHibernate;
+using NHibernate.Tool.hbm2ddl;
 using WinformsVibes.GUI;
+using WinformsVibes.Maps;
 using WinformsVibes.Models;
 
 namespace WinformsVibes.Database;
@@ -23,17 +25,25 @@ public static class DbConfig
     private static string MasterConnectionString =>
         $"Server={_settings.Server};User Id={_settings.UserId};Password={_settings.Password};";
 
-    public static ISessionFactory SessionFactory =>
-        _sessionFactory ??= Fluently.Configure()
+    private static FluentConfiguration BuildFluentConfig()
+    {
+        return Fluently.Configure()
             .Database(MsSqlConfiguration.MsSql2012
                 .ConnectionString(ConnectionString))
-            .Mappings(m => m.FluentMappings.AddFromAssemblyOf<ApplicationInfo>())
+            .Mappings(m =>
+            {
+                m.FluentMappings.Add<ApplicationInfoMap>();
+                m.FluentMappings.Add<HelpInfoMap>();
+            })
             .ExposeConfiguration(cfg =>
             {
                 cfg.SetProperty("use_proxy_validator", "false");
                 cfg.SetProperty("default_lazy", "false");
-            })
-            .BuildSessionFactory();
+            });
+    }
+
+    public static ISessionFactory SessionFactory =>
+        _sessionFactory ??= BuildFluentConfig().BuildSessionFactory();
 
     public static bool CheckConnection()
     {
@@ -96,8 +106,11 @@ public static class DbConfig
     {
         try
         {
+            var masterConnStr = $"Server={server};User Id={userId};Password={password};";
+            var connStr = $"Server={server};Database={databaseName};User Id={userId};Password={password};";
+
             // Create the database
-            using (var conn = new SqlConnection(MasterConnectionString))
+            using (var conn = new SqlConnection(masterConnStr))
             {
                 conn.Open();
                 using var cmd = conn.CreateCommand();
@@ -112,52 +125,35 @@ public static class DbConfig
             _settings.Password = password;
             DbSettingsManager.Save(_settings);
 
-            // Create the table and seed data
-            using (var conn = new SqlConnection(ConnectionString))
+            // Create tables from Fluent NHibernate mappings
+            var fluentCfg = Fluently.Configure()
+                .Database(MsSqlConfiguration.MsSql2012.ConnectionString(connStr))
+                .Mappings(m =>
+                {
+                    m.FluentMappings.Add<ApplicationInfoMap>();
+                    m.FluentMappings.Add<HelpInfoMap>();
+                })
+                .ExposeConfiguration(cfg =>
+                {
+                    cfg.SetProperty("use_proxy_validator", "false");
+                    cfg.SetProperty("default_lazy", "false");
+                });
+            var nhConfig = fluentCfg.BuildConfiguration();
+            using var schemaConn = new SqlConnection(connStr);
+            schemaConn.Open();
+            new SchemaExport(nhConfig)
+                .Create(true, true, schemaConn);
+
+            // Seed data
+            using (var conn = new SqlConnection(connStr))
             {
                 conn.Open();
-                using (var cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = @"
-                    IF OBJECT_ID('ApplicationInfo', 'U') IS NULL
-                    BEGIN
-                        CREATE TABLE ApplicationInfo (
-                            Id              INT IDENTITY(1,1) PRIMARY KEY,
-                            ApplicationName NVARCHAR(100) NOT NULL,
-                            Author          NVARCHAR(100) NOT NULL,
-                            Version         NVARCHAR(50)  NOT NULL,
-                            Description     NVARCHAR(500),
-                            Framework       NVARCHAR(50),
-                            Dependencies    NVARCHAR(MAX),
-                            CreatedAt       DATETIME2     DEFAULT SYSUTCDATETIME() NOT NULL,
-                            UpdatedAt       DATETIME2     DEFAULT SYSUTCDATETIME() NOT NULL
-                        );
-                    END";
-                    cmd.ExecuteNonQuery();
-                }
-
                 using (var cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
                     IF NOT EXISTS (SELECT 1 FROM ApplicationInfo)
                         INSERT INTO ApplicationInfo (ApplicationName, Author, Version, Description, Framework, Dependencies)
                         VALUES (N'Winforms Vibes', N'Eric', N'1.0', N'A simple Windows Forms demo application.', N'net10.0-windows', N'Microsoft.Web.WebView2 1.0.3967.48, ReaLTaiizor 3.8.1.8');";
-                    cmd.ExecuteNonQuery();
-                }
-
-                // Create the HelpInfo table
-                using (var cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = @"
-                    IF OBJECT_ID('HelpInfo', 'U') IS NULL
-                    BEGIN
-                        CREATE TABLE HelpInfo (
-                            Id      INT IDENTITY(1,1) PRIMARY KEY,
-                            Category NVARCHAR(100) NOT NULL,
-                            Topic    NVARCHAR(200) NOT NULL,
-                            Content  NVARCHAR(MAX)  NOT NULL
-                        );
-                    END";
                     cmd.ExecuteNonQuery();
                 }
 
@@ -192,7 +188,8 @@ public static class DbConfig
         }
         catch (Exception ex)
         {
-            errorMessage = ex.Message;
+            var inner = ex.InnerException;
+            errorMessage = inner != null ? $"{ex.Message} -> {inner.Message}" : ex.Message;
             return false;
         }
     }

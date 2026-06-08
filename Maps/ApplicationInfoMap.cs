@@ -14,7 +14,7 @@ public class ApplicationInfoMap : ClassMap<ApplicationInfo>
         Map(x => x.Version);
         Map(x => x.Description);
         Map(x => x.Framework);
-        Map(x => x.Dependencies);
+        Map(x => x.Dependencies).CustomSqlType("nvarchar(max)");
         Map(x => x.CreatedAt);
         Map(x => x.UpdatedAt);
     }

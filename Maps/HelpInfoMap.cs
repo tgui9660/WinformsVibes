@@ -11,6 +11,6 @@ public class HelpInfoMap : ClassMap<HelpInfo>
         Id(x => x.Id).Column("Id");
         Map(x => x.Category);
         Map(x => x.Topic);
-        Map(x => x.Content);
+        Map(x => x.Content).CustomSqlType("nvarchar(max)");
     }
 }

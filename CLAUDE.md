@@ -42,14 +42,17 @@ dotnet test WinformsVibes.Tests.csproj --filter "FullyQualifiedName~GetInstance_
 
 # Run tests in a test fixture
 dotnet test WinformsVibes.Tests.csproj --filter "FullyQualifiedName~ChatWindowTests"
+
+# Run database tests (requires SQL Server connection)
+dotnet test WinformsVibes.Tests.csproj --filter "FullyQualifiedName~DatabaseTests"
 ```
 
-The test project references `WinformsVibes.csproj` and excludes the main project's source files via `<Compile Remove>` to avoid CS0311/CS0436 conflicts. Tests use reflection to access private fields and methods, and a `MockChatClient` to test the chat flow without a live endpoint.
+The test project references `WinformsVibes.csproj` and excludes the main project's source files via `<Compile Remove>` to avoid CS0311/CS0436 conflicts. Tests use reflection to access private fields and methods, and a `MockChatClient` to test the chat flow without a live endpoint. `DatabaseTests` uses a `OneTimeSetUp` to drop the test database (`testdb_schema`) before running, so the tests always work against a fresh schema.
 
 ## Architecture
 
 ### Entry Point
-`Program.cs` — checks database connectivity. If unreachable, shows the database setup dialog (`DatabaseSetupDialog`). On success, syncs HelpInfo with HelpTopics.xml via `DbConfig.SyncHelpTopics()`, shows the splash screen (`Application.Run(splash)`), then launches the main form after the splash is closed (`Application.Run(new MainForm())`).
+`Program.cs` — checks database connectivity. If unreachable, shows the database setup dialog (`DatabaseSetupDialog`). On failure, copies the error message to the clipboard via `Clipboard.SetText()`. On success, syncs HelpInfo with HelpTopics.xml via `DbConfig.SyncHelpTopics()`, shows the splash screen (`Application.Run(splash)`), then launches the main form after the splash is closed (`Application.Run(new MainForm())`).
 
 ### GUI (`GUI/`)
 All UI forms live here under namespace `WinformsVibes.GUI`.
@@ -64,7 +67,7 @@ FixedDialog form with a dark theme that displays application info (name, version
 Extends `MaterialForm` from ReaLTaiizor (Material Design form base). Single-form application with:
 - **CrownMenuStrip** — ReaLTaiizor's material menu control with a custom `DarkMenuRenderer` (`ToolStripProfessionalRenderer` subclass with dark colors). Menus: File (New, Open, Save, Exit), Edit (Copy, Paste), View (Toggle Fullscreen, About), Settings (Preferences), Chat (AI Chat), Help (Contents, AI Help, About)
 - **TabControl** — one tab:
-  - **World Map** — WebView2 control loaded with Google Maps. A bottom coordPanel has Lat/Long `MaterialTextBox` inputs with rounded regions and a `MaterialButton` "Tell Me More!" button. Enter in a coord field navigates the map. The button opens the AIMapWindow and asks the agent about the first city within a 5 mile radius of the coordinates. `SourceChanged` event syncs the URL coordinates back into the Lat/Long inputs. Button is disabled when both coords are 0.
+  - **World Map** — WebView2 control loaded with Google Maps. A bottom coordPanel (60px height) has Lat/Long `MaterialTextBox` inputs (62px tall) with rounded regions and a `MaterialButton` "Tell Me More!" button. Enter in a coord field navigates the map. The button opens the AIMapWindow and asks the agent about the first city within a 5 mile radius of the coordinates. `SourceChanged` event syncs the URL coordinates back into the Lat/Long inputs. Button is disabled when both coords are 0.
 - **CrownStatusStrip** — "Ready" label at bottom, live clock updated by a 1-second `System.Windows.Forms.Timer`
 - **Icon** — procedurally drawn bear face via `CreateBearIcon()`
 
@@ -89,8 +92,9 @@ Database access layer under namespace `WinformsVibes.Database`.
 #### DbConfig (`Database/DbConfig.cs`)
 Fluent NHibernate config connecting to a local SQL Server. Connection details are loaded via `DbSettingsManager.Load()` from `dbconfig.json`.
 
+- `BuildFluentConfig()` — shared helper that builds the `FluentConfiguration` with explicit `Add<ApplicationInfoMap>()` and `Add<HelpInfoMap>()` mappings. Used by both `SessionFactory` and `CreateAndSeedDatabase`.
 - `CheckConnection()` — tests if the configured database is reachable
-- `CreateAndSeedDatabase(server, name, userId, password, out errorMessage)` — creates the database, the `ApplicationInfo` and `HelpInfo` tables, seeds `ApplicationInfo` with default app data, and seeds `HelpInfo` from `HelpTopics.xml`. Updates `_settings` with all four connection details and saves to `dbconfig.json`. Resets `_sessionFactory` so subsequent calls use the new connection.
+- `CreateAndSeedDatabase(server, name, userId, password, out errorMessage)` — creates the database, then uses `SchemaExport` from the Fluent NHibernate mappings to create the tables (no raw SQL DDL). Seeds `ApplicationInfo` with default app data and `HelpInfo` from `HelpTopics.xml`. Builds its own connection strings from the method parameters (not `_settings`). Updates `_settings` with all four connection details and saves to `dbconfig.json`. Resets `_sessionFactory` so subsequent calls use the new connection. Error message includes inner exception details.
 - `CurrentDatabaseName` — exposes the active database name for display on the splash screen
 - `CurrentServer` — exposes the active server for display on the splash screen
 - `CurrentUserId` — exposes the active user ID for display on the splash screen
@@ -105,8 +109,8 @@ Fluent NHibernate config connecting to a local SQL Server. Connection details ar
 Created automatically in the output directory (`bin/Debug/net10.0-windows/`) when the user creates a database via the setup dialog. Storing the connection here means the app remembers the database across launches. Deleting this file triggers the setup dialog on next launch.
 
 #### Entities & Mappings
-- `ApplicationInfo` (`Models/ApplicationInfo.cs`) — mapped by `ApplicationInfoMap` (`Maps/ApplicationInfoMap.cs`)
-- `HelpInfo` (`Models/HelpInfo.cs`) — mapped by `HelpInfoMap` (`Maps/HelpInfoMap.cs`)
+- `ApplicationInfo` (`Models/ApplicationInfo.cs`) — mapped by `ApplicationInfoMap` (`Maps/ApplicationInfoMap.cs`). `Dependencies` column uses `CustomSqlType("nvarchar(max)")`.
+- `HelpInfo` (`Models/HelpInfo.cs`) — mapped by `HelpInfoMap` (`Maps/HelpInfoMap.cs`). `Content` column uses `CustomSqlType("nvarchar(max)")`.
 - Proxy validation and lazy loading are disabled
 - `ApplicationInfo.DatabaseName`, `Server`, and `UserId` are **not mapped** to the database — set at runtime for display purposes
 
