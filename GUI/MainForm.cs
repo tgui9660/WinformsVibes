@@ -109,14 +109,14 @@ namespace WinformsVibes.GUI
             var coordPanel = new System.Windows.Forms.Panel
             {
                 Dock = DockStyle.Bottom,
-                Height = 86,
+                Height = 102,
                 Padding = new Padding(16, 12, 16, 12),
             };
 
             var latLabel = new MaterialLabel
             {
                 Text = "Lat",
-                Location = new Point(36, 28),
+                Location = new Point(36, 38),
                 Size = new Size(36, 30),
                 Font = new Font(Font.FontFamily, 16f),
             };
@@ -133,7 +133,7 @@ namespace WinformsVibes.GUI
             var longLabel = new MaterialLabel
             {
                 Text = "Long",
-                Location = new Point(284, 28),
+                Location = new Point(284, 38),
                 Size = new Size(36, 30),
                 Font = new Font(Font.FontFamily, 16f),
             };
@@ -150,7 +150,7 @@ namespace WinformsVibes.GUI
             var tellMeMoreButton = new MaterialButton
             {
                 Text = "Tell Me More!",
-                Location = new Point(496, 12),
+                Location = new Point(496, 20),
                 Size = new Size(200, 62),
                 Enabled = false,
                 Font = new Font(Font.FontFamily, 16f),
