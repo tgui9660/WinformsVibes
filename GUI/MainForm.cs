@@ -110,13 +110,13 @@ namespace WinformsVibes.GUI
             {
                 Dock = DockStyle.Bottom,
                 Height = 86,
-                Padding = new Padding(16, 8, 16, 8),
+                Padding = new Padding(16, 12, 16, 12),
             };
 
             var latLabel = new MaterialLabel
             {
                 Text = "Lat",
-                Location = new Point(36, 24),
+                Location = new Point(36, 28),
                 Size = new Size(36, 30),
                 Font = new Font(Font.FontFamily, 16f),
             };
@@ -124,7 +124,7 @@ namespace WinformsVibes.GUI
             var latInput = new MaterialTextBox
             {
                 Text = "0",
-                Location = new Point(76, 8),
+                Location = new Point(76, 12),
                 Size = new Size(160, 62),
                 Font = new Font(Font.FontFamily, 16f),
             };
@@ -133,7 +133,7 @@ namespace WinformsVibes.GUI
             var longLabel = new MaterialLabel
             {
                 Text = "Long",
-                Location = new Point(284, 24),
+                Location = new Point(284, 28),
                 Size = new Size(36, 30),
                 Font = new Font(Font.FontFamily, 16f),
             };
@@ -141,7 +141,7 @@ namespace WinformsVibes.GUI
             var longInput = new MaterialTextBox
             {
                 Text = "0",
-                Location = new Point(324, 8),
+                Location = new Point(324, 12),
                 Size = new Size(160, 62),
                 Font = new Font(Font.FontFamily, 16f),
             };
@@ -150,7 +150,7 @@ namespace WinformsVibes.GUI
             var tellMeMoreButton = new MaterialButton
             {
                 Text = "Tell Me More!",
-                Location = new Point(496, 11),
+                Location = new Point(496, 12),
                 Size = new Size(200, 62),
                 Enabled = false,
                 Font = new Font(Font.FontFamily, 16f),
