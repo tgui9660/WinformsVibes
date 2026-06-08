@@ -67,9 +67,12 @@ FixedDialog form with a dark theme that displays application info (name, version
 Extends `MaterialForm` from ReaLTaiizor (Material Design form base). Single-form application with:
 - **CrownMenuStrip** — ReaLTaiizor's material menu control with a custom `DarkMenuRenderer` (`ToolStripProfessionalRenderer` subclass with dark colors). Menus: File (New, Open, Save, Exit), Edit (Copy, Paste), View (Toggle Fullscreen, About), Settings (Preferences), Chat (AI Chat), Help (Contents, AI Help, About)
 - **TabControl** — one tab:
-  - **World Map** — WebView2 control loaded with Google Maps. A bottom coordPanel (60px height) has Lat/Long `MaterialTextBox` inputs (62px tall) with rounded regions and a `MaterialButton` "Tell Me More!" button. Enter in a coord field navigates the map. The button opens the AIMapWindow and asks the agent about the first city within a 5 mile radius of the coordinates. `SourceChanged` event syncs the URL coordinates back into the Lat/Long inputs. Button is disabled when both coords are 0.
+  - **World Map** — `WorldMapTab` UserControl (see below)
 - **CrownStatusStrip** — "Ready" label at bottom, live clock updated by a 1-second `System.Windows.Forms.Timer`
 - **Icon** — procedurally drawn bear face via `CreateBearIcon()`
+
+#### World Map Tab (`GUI/WorldMapTab.cs`)
+`UserControl` that encapsulates the Google Maps tab. Contains a `WebView2` loaded with Google Maps and a bottom `coordPanel` (60px height) with Lat/Long `MaterialTextBox` inputs (62px tall) with rounded regions and a `MaterialButton` "Tell Me More!" button. Enter in a coord field navigates the map. The button opens the `AIMapWindow` and asks the agent about the first city within a 5 mile radius of the coordinates. `SourceChanged` event syncs the URL coordinates back into the Lat/Long inputs. Button is disabled when both coords are 0. Uses `async void` with `await EnsureCoreWebView2Async()` for WebView2 initialization.
 
 #### Help Window (`GUI/HelpWindow.cs`)
 Dark-themed window opened via Help > Contents. Has a question mark icon (`SystemIcons.Question`). Groups help topics by unique Category+Topic pairs and displays all content values when selected. Search filters across category, topic name, and all content values. Uses `GroupedHelpTopic` record with a `List<string>` of contents. Also defines the `HelpTopic` record used by `DbConfig.GetHelpTopics()`.

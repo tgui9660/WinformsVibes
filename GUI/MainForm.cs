@@ -1,8 +1,6 @@
 using System;
 using System.Drawing;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Microsoft.Web.WebView2.WinForms;
 using ReaLTaiizor.Forms;
 using ReaLTaiizor.Controls;
 
@@ -102,67 +100,7 @@ namespace WinformsVibes.GUI
 
             // Tab content
             var tab = new TabControl { Dock = DockStyle.Fill };
-
-            // Google Maps World View
-            var mapTab = new System.Windows.Forms.TabPage("World Map");
-
-            var coordPanel = new System.Windows.Forms.Panel
-            {
-                Dock = DockStyle.Bottom,
-                Height = 60,
-                Padding = new Padding(16, 6, 16, 6),
-            };
-
-            var latLabel = new MaterialLabel
-            {
-                Text = "Lat",
-                Location = new Point(36, 23),
-                Size = new Size(36, 30),
-                Font = new Font(Font.FontFamily, 16f),
-            };
-
-            var latInput = new MaterialTextBox
-            {
-                Text = "0",
-                Location = new Point(76, 7),
-                Size = new Size(160, 62),
-                Font = new Font(Font.FontFamily, 16f),
-            };
-            latInput.Region = CreateRoundedRegion(latInput.Size, 16);
-
-            var longLabel = new MaterialLabel
-            {
-                Text = "Long",
-                Location = new Point(284, 23),
-                Size = new Size(36, 30),
-                Font = new Font(Font.FontFamily, 16f),
-            };
-
-            var longInput = new MaterialTextBox
-            {
-                Text = "0",
-                Location = new Point(324, 7),
-                Size = new Size(160, 62),
-                Font = new Font(Font.FontFamily, 16f),
-            };
-            longInput.Region = CreateRoundedRegion(longInput.Size, 16);
-
-            var tellMeMoreButton = new MaterialButton
-            {
-                Text = "Tell Me More!",
-                Location = new Point(532, 10),
-                Size = new Size(200, 62),
-                Enabled = false,
-                Font = new Font(Font.FontFamily, 16f),
-            };
-
-            coordPanel.Controls.AddRange(new Control[] { latLabel, latInput, longLabel, longInput, tellMeMoreButton });
-
-            var webView = new WebView2 { Dock = DockStyle.Fill };
-            mapTab.Controls.Add(coordPanel);
-            mapTab.Controls.Add(webView);
-            InitializeMapAsync(webView, latInput, longInput, tellMeMoreButton);
-
+            var mapTab = new System.Windows.Forms.TabPage("World Map") { Controls = { new WorldMapTab { Dock = DockStyle.Fill } } };
             tab.TabPages.Add(mapTab);
 
             // Timer to update the clock in the status bar
@@ -184,62 +122,6 @@ namespace WinformsVibes.GUI
                 "About Winforms Vibes",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
-        }
-
-        private async void InitializeMapAsync(WebView2 webView, MaterialTextBox latInput, MaterialTextBox longInput, MaterialButton tellMeMoreButton)
-        {
-            await webView.EnsureCoreWebView2Async();
-            webView.CoreWebView2.Navigate("https://www.google.com/maps/@0,0,2z");
-
-            var Navigate = () =>
-            {
-                if (double.TryParse(latInput.Text, out var lat) && double.TryParse(longInput.Text, out var lon))
-                {
-                    webView.CoreWebView2.Navigate($"https://www.google.com/maps/@{lat},{lon},12z");
-                }
-            };
-
-            latInput.KeyDown += (_, e) => { if (e.KeyCode == Keys.Enter) Navigate(); };
-            longInput.KeyDown += (_, e) => { if (e.KeyCode == Keys.Enter) Navigate(); };
-
-            var UpdateButton = () =>
-            {
-                tellMeMoreButton.Enabled =
-                    double.TryParse(latInput.Text, out var lat) &&
-                    double.TryParse(longInput.Text, out var lon) &&
-                    (lat != 0 || lon != 0);
-            };
-            latInput.KeyUp += (_, _) => UpdateButton();
-            longInput.KeyUp += (_, _) => UpdateButton();
-
-            tellMeMoreButton.Click += (_, _) =>
-            {
-                if (double.TryParse(latInput.Text, out var lat) && double.TryParse(longInput.Text, out var lon))
-                {
-                    _ = AIMapWindow.GetInstance().AskAsync($"Tell me more about the first city found within a 5 mile radius of coordinates {lat}, {lon}.");
-                }
-            };
-
-            webView.CoreWebView2.SourceChanged += (_, _) =>
-            {
-                var src = webView.Source.ToString();
-                var atIdx = src.IndexOf("@");
-                if (atIdx < 0) return;
-
-                var after = src.Substring(atIdx + 1);
-                var stopIdx = after.IndexOfAny(new[] { '!', '&', '#', '?' });
-                if (stopIdx >= 0) after = after.Substring(0, stopIdx);
-
-                var parts = after.Split(',');
-                if (parts.Length < 2) return;
-
-                if (double.TryParse(parts[0], out var lat) && double.TryParse(parts[1], out var lon))
-                {
-                    latInput.Text = lat.ToString("F5");
-                    longInput.Text = lon.ToString("F5");
-                    UpdateButton();
-                }
-            };
         }
 
         private static Icon CreateBearIcon()
@@ -273,19 +155,7 @@ namespace WinformsVibes.GUI
             return Icon.FromHandle(bmp.GetHicon());
         }
 
-        static Region CreateRoundedRegion(Size size, int radius)
-        {
-            var path = new System.Drawing.Drawing2D.GraphicsPath();
-            var d = radius * 2;
-            path.AddArc(0, 0, d, d, 180, 90);
-            path.AddArc(size.Width - d, 0, d, d, 270, 90);
-            path.AddArc(size.Width - d, size.Height - d, d, d, 0, 90);
-            path.AddArc(0, size.Height - d, d, d, 90, 90);
-            path.CloseFigure();
-            return new Region(path);
-        }
-
-        class DarkMenuRenderer : ToolStripProfessionalRenderer
+       class DarkMenuRenderer : ToolStripProfessionalRenderer
         {
             static readonly Color BackColor = Color.FromArgb(66, 66, 66);
             static readonly Color ForeColor = Color.White;

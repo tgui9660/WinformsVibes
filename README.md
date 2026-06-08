@@ -48,6 +48,7 @@ A Windows Forms desktop application built with .NET 10.0, featuring a splash scr
 | `Program.cs` | Entry point — database check, help sync, splash screen, main form |
 | `SplashScreen.cs` | Startup splash with application info |
 | `MainForm.cs` | Main application window with menu, tabs, and status bar |
+| `WorldMapTab.cs` | World Map tab as a `UserControl` — WebView2, coord panel, Lat/Long inputs, "Tell Me More!" button |
 | `DatabaseSetupDialog.cs` | First-run database creation dialog |
 | `DbConfig.cs` | Database connection, Fluent NHibernate config, `SchemaExport` for table creation, seed logic, help sync |
 | `DbSettings.cs` | Connection settings model and JSON config manager |
