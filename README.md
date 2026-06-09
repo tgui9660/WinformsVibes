@@ -10,13 +10,13 @@ A Windows Forms desktop application built with .NET 10.0, featuring a splash scr
 
 - **Splash Screen** — displays application info (name, version, author, framework, database, server, user) fetched from the database. Bottom toolbar with a right-aligned Continue button to proceed.
 - **Main Form** — menu bar with File, Edit, View, Chat, Settings, and Help menus
-- **World Map** — embedded Google Maps via WebView2 (Chromium-based)
+- **World Map** — embedded Google Maps via WebView2 (Chromium-based). Lat/Long coordinates are populated by clicking the map or entering them manually in the coord panel.
 - **Live Clock** — status bar clock that updates every second
 - **Database Setup** — first-run wizard with inputs for server, database name, username, and password
 - **Help Topics** — browsable help content covering project structure, GUI features, and usage
 - **AI Chat** — chat with a local LLM via Chat > AI Chat
 - **Fella - AI Helper** — context-aware help assistant that uses HelpInfo data to answer questions (Help > AI Help). Title bar shows a question mark icon and displays a red welcome message.
-- **AI Map Chat** — singleton chat window opened by the "Tell Me More!" button. Exposes `AskAsync(string message)` for programmatic use. Assistant responses are green.
+- **AI Map Chat** — singleton chat window opened by the "Tell Me More!" button. When coordinates are set (by clicking the map or entering Lat/Long), the button launches an AI agent that searches for the first city within a 5-mile radius and returns information about it. Exposes `AskAsync(string message)` for programmatic use. Assistant responses are green.
 - **Help Sync** — HelpInfo table is automatically synced with HelpTopics.xml on every launch
 - **Build Release** — BuildRelease.bat publishes a release to a timestamped folder under Releases/
 
