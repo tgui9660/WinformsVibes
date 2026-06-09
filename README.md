@@ -4,6 +4,8 @@
 
 A Windows Forms desktop application built with .NET 10.0, featuring a splash screen, menu bar, status bar, embedded Google Maps via WebView2, and AI chat powered by a local OpenAI-compatible endpoint.
 
+![App Screenshot](AppScreenshot.png)
+
 ## Features
 
 - **Splash Screen** — displays application info (name, version, author, framework, database, server, user) fetched from the database. Bottom toolbar with a right-aligned Continue button to proceed.
