@@ -14,7 +14,7 @@ public class SplashScreen : TitleBarTooltipForm
         this.MaximizeBox = false;
         this.MinimizeBox = false;
         this.BackColor = Color.FromArgb(30, 30, 46);
-        this.Size = new Size(420, 390);
+        this.Size = new Size(420, 430);
         this.DoubleBuffered = true;
         this.Icon = CreateBearIcon();
 
@@ -94,17 +94,25 @@ public class SplashScreen : TitleBarTooltipForm
             AutoSize = false,
         };
 
+        var bear = new PictureBox
+        {
+            Image = Image.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DancingBear.gif")),
+            SizeMode = PictureBoxSizeMode.Zoom,
+            Location = new Point(150, 230),
+            Size = new Size(100, 100),
+        };
+
         var separator = new Label
         {
             Text = new string('─', 58),
             Font = new Font("Segoe UI", 8f),
             ForeColor = Color.FromArgb(70, 70, 90),
-            Location = new Point(20, 230),
+            Location = new Point(20, 355),
             Size = new Size(380, 15),
             AutoSize = false,
         };
 
-        mainPanel.Controls.AddRange(new Control[] { title, version, author, framework, database, server, username, separator });
+        mainPanel.Controls.AddRange(new Control[] { title, version, author, framework, database, server, username, bear, separator });
 
         // --- Bottom toolbar ---
         var toolbar = new Panel

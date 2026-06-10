@@ -8,7 +8,7 @@ A Windows Forms desktop application built with .NET 10.0, featuring a splash scr
 
 ## Features
 
-- **Splash Screen** — displays application info (name, version, author, framework, database, server, user) fetched from the database. Bottom toolbar with a right-aligned Continue button to proceed.
+- **Splash Screen** — displays application info (name, version, author, framework, database, server, user) fetched from the database. Animated dancing bear below the user line. Bottom toolbar with a right-aligned Continue button to proceed.
 - **Main Form** — menu bar with File, Edit, View, Chat, Settings, and Help menus. Restores to 1280×800 when unmaximized.
 - **Title Bar Tooltips** — hovering over minimize, maximize, or close buttons on any window shows a tooltip ("Minimize", "Maximize"/"Restore Down", "Close")
 - **World Map** — embedded Google Maps via WebView2 (Chromium-based). Lat/Long coordinates are populated by clicking the map or entering them manually in the coord panel.
@@ -49,7 +49,8 @@ A Windows Forms desktop application built with .NET 10.0, featuring a splash scr
 | Path | Description |
 |---|---|
 | `Program.cs` | Entry point — database check, help sync, splash screen, main form |
-| `SplashScreen.cs` | Startup splash with application info |
+| `SplashScreen.cs` | Startup splash with application info and animated dancing bear |
+| `DancingBear.gif` | Animated dancing bear GIF embedded in the splash screen |
 | `MainForm.cs` | Main application window with menu, tabs, and status bar |
 | `WorldMapTab.cs` | World Map tab as a `UserControl` — WebView2, coord panel, Lat/Long inputs, "Tell Me More!" button |
 | `DatabaseSetupDialog.cs` | First-run database creation dialog |

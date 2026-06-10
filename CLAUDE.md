@@ -61,7 +61,7 @@ All UI forms live here under namespace `WinformsVibes.GUI`.
 Dark-themed dialog shown when no database connection is available. Four inputs: Server (defaults to `localhost`), Database (required, no default), Username (defaults to `sa`), and Password (masked with `UseSystemPasswordChar`). Focus lands on the Database field. Exposes `Server`, `DatabaseName`, `UserId`, and `Password` properties. Pressing Enter in any field submits; Escape cancels.
 
 #### Splash Screen (`GUI/SplashScreen.cs`)
-FixedDialog form with a dark theme that displays application info (name, version, author, framework, database, server, user) fetched from the database. A bottom toolbar contains a right-aligned "Continue" button. Clicking the button or the X closes the splash and proceeds to the main form.
+FixedDialog form with a dark theme that displays application info (name, version, author, framework, database, server, user) fetched from the database. A `PictureBox` below the user line shows an animated dancing bear from `DancingBear.gif` (100×100px, `SizeMode.Zoom`). A bottom toolbar contains a right-aligned "Continue" button. Clicking the button or the X closes the splash and proceeds to the main form.
 
 #### Main Form (`GUI/MainForm.cs`)
 Extends `TitleBarTooltipMaterialForm` (which extends `MaterialForm` from ReaLTaiizor). `Size` is set to 1280×800 before maximizing so restoring down gives a reasonable window size. Single-form application with:
