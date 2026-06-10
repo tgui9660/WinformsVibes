@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 namespace WinformsVibes.GUI;
 
-public class DatabaseSetupDialog : Form
+public class DatabaseSetupDialog : TitleBarTooltipForm
 {
     public string? Server { get; private set; }
     public string? DatabaseName { get; private set; }

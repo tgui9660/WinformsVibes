@@ -6,7 +6,7 @@ using ReaLTaiizor.Controls;
 
 namespace WinformsVibes.GUI
 {
-    class MainForm : MaterialForm
+    class MainForm : TitleBarTooltipMaterialForm
     {
         private CrownMenuStrip _menuStrip;
         private CrownStatusStrip _statusStrip;
@@ -15,6 +15,7 @@ namespace WinformsVibes.GUI
         public MainForm()
         {
             Text = "Winforms Vibes";
+            Size = new Size(1280, 800);
             WindowState = FormWindowState.Maximized;
             Icon = CreateBearIcon();
 

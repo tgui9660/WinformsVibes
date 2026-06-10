@@ -9,7 +9,8 @@ A Windows Forms desktop application built with .NET 10.0, featuring a splash scr
 ## Features
 
 - **Splash Screen** — displays application info (name, version, author, framework, database, server, user) fetched from the database. Bottom toolbar with a right-aligned Continue button to proceed.
-- **Main Form** — menu bar with File, Edit, View, Chat, Settings, and Help menus
+- **Main Form** — menu bar with File, Edit, View, Chat, Settings, and Help menus. Restores to 1280×800 when unmaximized.
+- **Title Bar Tooltips** — hovering over minimize, maximize, or close buttons on any window shows a tooltip ("Minimize", "Maximize"/"Restore Down", "Close")
 - **World Map** — embedded Google Maps via WebView2 (Chromium-based). Lat/Long coordinates are populated by clicking the map or entering them manually in the coord panel.
 - **Live Clock** — status bar clock that updates every second
 - **Database Setup** — first-run wizard with inputs for server, database name, username, and password
@@ -57,6 +58,8 @@ A Windows Forms desktop application built with .NET 10.0, featuring a splash scr
 | `ChatWindow.cs` | AI chat window connecting to local OpenAI-compatible endpoint |
 | `AIHelpWindow.cs` | AI-powered help assistant using HelpInfo context |
 | `AIMapWindow.cs` | Singleton map chat window with `AskAsync` for programmatic use |
+| `TitleBarTooltipForm.cs` | Base `Form` class that shows tooltips on minimize/maximize/close title bar buttons |
+| `TitleBarTooltipMaterialForm.cs` | Same as above but extends `MaterialForm` for MainForm |
 | `OpenAIChatClient.cs` | HttpClient-based OpenAI chat completions client |
 | `HelpWindow.cs` | Browsable help topics window — groups by unique Category+Topic, shows all content values |
 | `Models/` | Entity models (`ApplicationInfo`, `HelpInfo`) |

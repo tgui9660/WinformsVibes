@@ -4,7 +4,7 @@ using WinformsVibes.Database;
 
 namespace WinformsVibes.GUI;
 
-public class HelpWindow : Form
+public class HelpWindow : TitleBarTooltipForm
 {
     private TextBox _searchBox;
     private ListView _listView;

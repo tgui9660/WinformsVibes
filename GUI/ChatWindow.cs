@@ -4,7 +4,7 @@ using WinformsVibes.AI;
 
 namespace WinformsVibes.GUI;
 
-public class ChatWindow : Form
+public class ChatWindow : TitleBarTooltipForm
 {
     private const string ApiKey = "apikey";
     private const string Model = "Qwen3.6-27B-MTP-Q4_K_M";

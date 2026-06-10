@@ -5,7 +5,7 @@ using WinformsVibes.Database;
 
 namespace WinformsVibes.GUI;
 
-public class AIHelpWindow : Form
+public class AIHelpWindow : TitleBarTooltipForm
 {
     private const string ApiKey = "apikey";
     private const string Model = "Qwen3.6-27B-MTP-Q4_K_M";

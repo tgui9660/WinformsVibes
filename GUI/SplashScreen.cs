@@ -4,11 +4,12 @@ using WinformsVibes.Models;
 
 namespace WinformsVibes.GUI;
 
-public class SplashScreen : Form
+public class SplashScreen : TitleBarTooltipForm
 {
     public SplashScreen(ApplicationInfo info)
     {
         this.StartPosition = FormStartPosition.CenterScreen;
+        this.TopMost = true;
         this.FormBorderStyle = FormBorderStyle.FixedDialog;
         this.MaximizeBox = false;
         this.MinimizeBox = false;

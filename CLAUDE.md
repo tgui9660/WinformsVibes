@@ -64,7 +64,7 @@ Dark-themed dialog shown when no database connection is available. Four inputs: 
 FixedDialog form with a dark theme that displays application info (name, version, author, framework, database, server, user) fetched from the database. A bottom toolbar contains a right-aligned "Continue" button. Clicking the button or the X closes the splash and proceeds to the main form.
 
 #### Main Form (`GUI/MainForm.cs`)
-Extends `MaterialForm` from ReaLTaiizor (Material Design form base). Single-form application with:
+Extends `TitleBarTooltipMaterialForm` (which extends `MaterialForm` from ReaLTaiizor). `Size` is set to 1280×800 before maximizing so restoring down gives a reasonable window size. Single-form application with:
 - **CrownMenuStrip** — ReaLTaiizor's material menu control with a custom `DarkMenuRenderer` (`ToolStripProfessionalRenderer` subclass with dark colors). Menus: File (New, Open, Save, Exit), Edit (Copy, Paste), View (Toggle Fullscreen, About), Settings (Preferences), Chat (AI Chat), Help (Contents, AI Help, About)
 - **TabControl** — one tab:
   - **World Map** — `WorldMapTab` UserControl (see below)
@@ -106,10 +106,10 @@ Fluent NHibernate config connecting to a local SQL Server. Connection details ar
 - `SyncHelpTopics()` — truncates HelpInfo and re-seeds from HelpTopics.xml on every launch (XML is the source of truth)
 
 #### DbSettings (`Database/DbSettings.cs`)
-`DbSettings` POCO with Server, DatabaseName, UserId, Password properties. `DbSettingsManager` reads/writes `dbconfig.json` from the output directory using `System.Text.Json`. If the file is missing, returns a `DbSettings` with defaults (`localhost`/`winformsvibes`/`sa`/`password`).
+`DbSettings` POCO with Server, DatabaseName, UserId, Password properties. `DbSettingsManager` reads/writes `dbconfig.json` from `%LOCALAPPDATA%/WinformsVibes/` using `System.Text.Json`. Migrates from old app-directory location on first run. If the file is missing, returns a `DbSettings` with defaults (`localhost`/`winformsvibes`/`sa`/`password`).
 
 #### Config File (`dbconfig.json`)
-Created automatically in the output directory (`bin/Debug/net10.0-windows/`) when the user creates a database via the setup dialog. Storing the connection here means the app remembers the database across launches. Deleting this file triggers the setup dialog on next launch.
+Created automatically in `%LOCALAPPDATA%/WinformsVibes/` when the user creates a database via the setup dialog. This location ensures the app can write config even when installed to Program Files. On first run after update, the config is migrated from the old app-directory location if found. Deleting this file triggers the setup dialog on next launch.
 
 #### Entities & Mappings
 - `ApplicationInfo` (`Models/ApplicationInfo.cs`) — mapped by `ApplicationInfoMap` (`Maps/ApplicationInfoMap.cs`). `Dependencies` column uses `CustomSqlType("nvarchar(max)")`.
@@ -125,6 +125,11 @@ Critical: use `async void` with `await EnsureCoreWebView2Async()` before calling
 
 ### Layout Order
 Controls must be added in this order: TabControl first, StatusStrip second, MenuStrip last. `MainMenuStrip` is set after all controls are added. DockStyle.Fill on TabControl fills remaining space between menu and status bar.
+
+### Title Bar Tooltip Base Classes
+- `TitleBarTooltipForm` (`GUI/TitleBarTooltipForm.cs`) — extends `Form`, overrides `WndProc` to intercept `WM_MOUSEMOVE` and send `WM_NCHITTEST` to detect cursor over minimize/maximize/close buttons. Shows tooltips ("Minimize", "Maximize"/"Restore Down", "Close"). Hidden when mouse enters client area. Disposes its `ToolTip` in `OnHandleDestroyed`.
+- `TitleBarTooltipMaterialForm` (`GUI/TitleBarTooltipMaterialForm.cs`) — same logic but extends `MaterialForm` for MainForm.
+- All standard forms inherit from `TitleBarTooltipForm`; MainForm inherits from `TitleBarTooltipMaterialForm`.
 
 ### Singleton Windows
 ChatWindow, AIHelpWindow, and AIMapWindow use a static `_instance` field with `GetInstance()`. Clicking X calls `Hide()` instead of closing, preserving the singleton and full chat history.
@@ -145,4 +150,4 @@ ChatWindow, AIHelpWindow, and AIMapWindow use a static `_instance` field with `G
 
 ## Configuration
 
-The active database connection is stored in `dbconfig.json` (created automatically in the output directory). Edit `DatabaseName` to switch databases, or delete the file to trigger the setup dialog on next launch.
+The active database connection is stored in `dbconfig.json` under `%LOCALAPPDATA%/WinformsVibes/`. Edit `DatabaseName` to switch databases, or delete the file to trigger the setup dialog on next launch.
