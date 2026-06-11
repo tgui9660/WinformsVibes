@@ -9,13 +9,13 @@ namespace WinformsVibes.GUI
     class WorldMapTab : UserControl
     {
         private readonly WebView2 _webView = new WebView2 { Dock = DockStyle.Fill };
-        private readonly MaterialTextBox _latInput;
-        private readonly MaterialTextBox _longInput;
+        private readonly MaterialTextBoxEdit _latInput;
+        private readonly MaterialTextBoxEdit _longInput;
         private readonly MaterialButton _tellMeMoreButton;
 
         public WorldMapTab()
         {
-            _latInput = new MaterialTextBox
+            _latInput = new MaterialTextBoxEdit
             {
                 Text = "0",
                 Location = new Point(76, 7),
@@ -24,7 +24,7 @@ namespace WinformsVibes.GUI
             };
             _latInput.Region = CreateRoundedRegion(_latInput.Size, 16);
 
-            _longInput = new MaterialTextBox
+            _longInput = new MaterialTextBoxEdit
             {
                 Text = "0",
                 Location = new Point(324, 7),

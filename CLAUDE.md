@@ -72,7 +72,7 @@ Extends `TitleBarTooltipMaterialForm` (which extends `MaterialForm` from ReaLTai
 - **Icon** — procedurally drawn bear face via `CreateBearIcon()`
 
 #### World Map Tab (`GUI/WorldMapTab.cs`)
-`UserControl` that encapsulates the Google Maps tab. Contains a `WebView2` loaded with Google Maps and a bottom `coordPanel` (60px height) with Lat/Long `MaterialTextBox` inputs (62px tall) with rounded regions and a `MaterialButton` "Tell Me More!" button. Enter in a coord field navigates the map. The button opens the `AIMapWindow` and asks the agent about the first city within a 5 mile radius of the coordinates. `SourceChanged` event syncs the URL coordinates back into the Lat/Long inputs. Button is disabled when both coords are 0. Uses `async void` with `await EnsureCoreWebView2Async()` for WebView2 initialization.
+`UserControl` that encapsulates the Google Maps tab. Contains a `WebView2` loaded with Google Maps and a bottom `coordPanel` (60px height) with Lat/Long `MaterialTextBoxEdit` inputs (62px tall) with rounded regions and a `MaterialButton` "Tell Me More!" button. Enter in a coord field navigates the map. The button opens the `AIMapWindow` and asks the agent about the first city within a 5 mile radius of the coordinates. `SourceChanged` event syncs the URL coordinates back into the Lat/Long inputs. Button is disabled when both coords are 0. Uses `async void` with `await EnsureCoreWebView2Async()` for WebView2 initialization.
 
 #### Help Window (`GUI/HelpWindow.cs`)
 Dark-themed window opened via Help > Contents. Has a question mark icon (`SystemIcons.Question`). Groups help topics by unique Category+Topic pairs and displays all content values when selected. Search filters across category, topic name, and all content values. Uses `GroupedHelpTopic` record with a `List<string>` of contents. Also defines the `HelpTopic` record used by `DbConfig.GetHelpTopics()`.
@@ -143,10 +143,10 @@ ChatWindow, AIHelpWindow, and AIMapWindow use a static `_instance` field with `G
 
 ## Known Issues
 
-- WindowsBase version conflict warning (MSB3277) from WebView2 referencing net5.0 assemblies against net10.0 — harmless, safe to ignore
 - Running via `dotnet run` in Git Bash exits immediately because the GUI detaches from the shell. Use `RunMe.bat` or the compiled `.exe` directly.
 - `WinformsVibes.slnx` is a minimal stub (`<Solution></Solution>`) — do not rely on it. Build via the `.csproj` files or batch scripts.
 - `Directory.Build.props` sets `obj\$(MSBuildProjectFile)\` per project to avoid MSBuild conflicts between the main and test projects.
+- MSB3277 (WindowsBase version conflict from WebView2) is suppressed via `<NoWarn>MSB3277</NoWarn>` in both `.csproj` files.
 
 ## Configuration
 

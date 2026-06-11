@@ -86,7 +86,6 @@ Edit `HelpTopics.xml` to add, remove, or modify help topics. On every launch, th
 
 ## Known Issues
 
-- WindowsBase version conflict warning (MSB3277) from WebView2 referencing net5.0 assemblies against net10.0 — harmless, safe to ignore
 - Running via `dotnet run` in Git Bash exits immediately because the GUI detaches from the shell. Use `RunMe.bat` or the compiled `.exe` directly.
 
 ## Tests

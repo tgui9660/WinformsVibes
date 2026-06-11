@@ -40,12 +40,13 @@ public class ChatWindow : TitleBarTooltipForm
         _thinkingTimer = new System.Windows.Forms.Timer { Interval = 400 };
         _thinkingTimer.Tick += (_, _) =>
         {
+            var log = _chatLog!;
             _thinkingDotCount = (_thinkingDotCount + 1) % 4;
             var dots = new string('.', _thinkingDotCount);
             var text = $"Thinking{dots}";
-            _chatLog.Select(_thinkingStartIndex, 12);
-            _chatLog.SelectedText = text;
-            _chatLog.ScrollToCaret();
+            log.Select(_thinkingStartIndex, 12);
+            log.SelectedText = text;
+            log.ScrollToCaret();
         };
 
         var panel = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(30, 30, 46) };
