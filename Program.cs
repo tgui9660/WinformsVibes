@@ -25,7 +25,12 @@ internal static class Program
                 return;
             }
 
-            if (!DbConfig.CreateAndSeedDatabase(setup.Server ?? "localhost", setup.DatabaseName, setup.UserId ?? "sa", setup.Password ?? "", out var err))
+            if (!DbConfig.CreateAndSeedDatabase(
+                setup.Provider ?? DatabaseProvider.SqlServer,
+                setup.Server ?? "localhost",
+                setup.DatabaseName,
+                setup.UserId ?? "sa",
+                setup.Password ?? "", out var err))
             {
                 Clipboard.SetText($"Failed to create the database: {err}");
                 MessageBox.Show($"Failed to create the database: {err}\n\n(Error message copied to clipboard)",

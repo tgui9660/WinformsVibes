@@ -14,6 +14,19 @@ dotnet publish WinformsVibes.csproj -c Release -r win-x64 --no-self-contained -o
 
 if %ERRORLEVEL% equ 0 (
     echo Release built: %RELEASE_DIR%
+
+    :: Clear release config so setup dialog appears on first run of the release
+    set APPDATA_CONFIG=%LOCALAPPDATA%\WinformsVibes-Release\dbconfig.release.json
+    if exist "%APPDATA_CONFIG%" (
+        echo Clearing release config for fresh start...
+        del "%APPDATA_CONFIG%"
+    )
+
+    :: Remove WebView2 cache directory if present
+    if exist "%RELEASE_DIR%\WinformsVibes.exe.WebView2" (
+        echo Removing WebView2 cache from release...
+        rmdir /s /q "%RELEASE_DIR%\WinformsVibes.exe.WebView2"
+    )
 ) else (
     echo Build failed.
     exit /b 1

@@ -1,4 +1,5 @@
 using FluentNHibernate.Mapping;
+using WinformsVibes.Database;
 using WinformsVibes.Models;
 
 namespace WinformsVibes.Maps;
@@ -14,7 +15,7 @@ public class ApplicationInfoMap : ClassMap<ApplicationInfo>
         Map(x => x.Version);
         Map(x => x.Description);
         Map(x => x.Framework);
-        Map(x => x.Dependencies).CustomSqlType("nvarchar(max)");
+        Map(x => x.Dependencies).CustomSqlType(DbConfig.LongStringSqlType);
         Map(x => x.CreatedAt);
         Map(x => x.UpdatedAt);
     }

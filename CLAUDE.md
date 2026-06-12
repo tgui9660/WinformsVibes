@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 
 ## Project Overview
 
-WinformsVibes is a .NET 10.0 Windows Forms desktop application, entirely AI-generated using a local Qwen3.6 LLM. It features a splash screen, menu bar, status bar, and tabbed content with embedded Google Maps via WebView2. Application info is fetched from a SQL Server database via Fluent NHibernate and displayed on the splash screen at startup. On first launch (or when the configured database is unavailable), a setup dialog lets the user create and name a new database. Includes a help topics browser, an AI chat window, an AI help assistant that uses HelpInfo data as context, and an AI map chat window for programmatic queries. All AI windows connect to a local OpenAI-compatible endpoint (192.168.2.15:8888).
+WinformsVibes is a .NET 10.0 Windows Forms desktop application, entirely AI-generated using a local Qwen3.6 LLM. It features a splash screen, menu bar, status bar, and tabbed content with embedded Google Maps via WebView2. Application info is fetched from a database via Fluent NHibernate and displayed on the splash screen at startup. Supports SQL Server, PostgreSQL, and MySQL as backend databases. On first launch (or when the configured database is unavailable), a setup dialog lets the user choose a provider, create and name a new database. Includes a help topics browser, an AI chat window, an AI help assistant that uses HelpInfo data as context, and an AI map chat window for programmatic queries. All AI windows connect to a local OpenAI-compatible endpoint (192.168.2.15:8888).
 
-**System requirements:** .NET 10.0 SDK, SQL Server with `sa` authentication, Windows 10+ (for WebView2).
+**System requirements:** .NET 10.0 SDK, SQL Server with `sa` authentication, PostgreSQL 12+, or MySQL 5+, Windows 10+ (for WebView2).
 
 ## Build and Run
 
@@ -49,6 +49,17 @@ dotnet test WinformsVibes.Tests.csproj --filter "FullyQualifiedName~DatabaseTest
 
 The test project references `WinformsVibes.csproj` and excludes the main project's source files via `<Compile Remove>` to avoid CS0311/CS0436 conflicts. Tests use reflection to access private fields and methods, and a `MockChatClient` to test the chat flow without a live endpoint. `DatabaseTests` uses a `OneTimeSetUp` to drop the test database (`testdb_schema`) before running, so the tests always work against a fresh schema.
 
+### Test Coverage (69 tests across 6 files)
+
+| File | Tests | Coverage |
+|---|---|---|
+| `ChatWindowTests.cs` | 19 | Singleton, form properties, API constants, chat log, append methods, form closing, chat flow with mock client |
+| `AIHelpWindowTests.cs` | 13 | Singleton, window title, icon, form properties, API constants, connection/welcome messages, form closing |
+| `AIMapWindowTests.cs` | 13 | Singleton, window title, form properties, API constants, connection message, append methods, form closing |
+| `DatabaseSetupDialogTests.cs` | 12 | Dialog title, provider selector (3 options), defaults, username updates per provider |
+| `DbSettingsTests.cs` | 8 | No hardcoded credentials, all 3 providers in enum, provider can be set |
+| `DatabaseTests.cs` | 3 | SQL Server integration — database creation, SchemaExport, seeding |
+
 ## Architecture
 
 ### Entry Point
@@ -58,7 +69,7 @@ The test project references `WinformsVibes.csproj` and excludes the main project
 All UI forms live here under namespace `WinformsVibes.GUI`.
 
 #### Database Setup Dialog (`GUI/DatabaseSetupDialog.cs`)
-Dark-themed dialog shown when no database connection is available. Four inputs: Server (defaults to `localhost`), Database (required, no default), Username (defaults to `sa`), and Password (masked with `UseSystemPasswordChar`). Focus lands on the Database field. Exposes `Server`, `DatabaseName`, `UserId`, and `Password` properties. Pressing Enter in any field submits; Escape cancels.
+Dark-themed dialog shown when no database connection is available. Five inputs: Provider (ComboBox with "SQL Server", "PostgreSQL", and "MySQL", defaults to SQL Server), Server (defaults to `localhost`), Database (required, no default), Username (defaults to `sa` for SQL Server, `postgres` for PostgreSQL, `root` for MySQL — updates when provider changes), and Password (masked with `UseSystemPasswordChar`). Focus lands on the Database field. Exposes `Provider`, `Server`, `DatabaseName`, `UserId`, and `Password` properties. Pressing Enter in any field submits; Escape cancels.
 
 #### Splash Screen (`GUI/SplashScreen.cs`)
 FixedDialog form with a dark theme that displays application info (name, version, author, framework, database, server, user) fetched from the database. A `PictureBox` below the user line shows an animated dancing bear from `DancingBear.gif` (100×100px, `SizeMode.Zoom`). A bottom toolbar contains a right-aligned "Continue" button. Clicking the button or the X closes the splash and proceeds to the main form.
@@ -92,30 +103,35 @@ Uses `HttpClient` with `System.Text.Json` to call the OpenAI `/chat/completions`
 ### Database (`Database/`)
 Database access layer under namespace `WinformsVibes.Database`.
 
-#### DbConfig (`Database/DbConfig.cs`)
-Fluent NHibernate config connecting to a local SQL Server. Connection details are loaded via `DbSettingsManager.Load()` from `dbconfig.json`.
+**IMPORTANT: Only use Fluent NHibernate for schema creation.** Never use raw DDL (CREATE TABLE, ALTER TABLE, etc.) for schema operations. Use `SchemaExport` from the Fluent NHibernate mappings. Raw SQL is only acceptable for simple data operations (INSERT, SELECT, TRUNCATE).
 
-- `BuildFluentConfig()` — shared helper that builds the `FluentConfiguration` with explicit `Add<ApplicationInfoMap>()` and `Add<HelpInfoMap>()` mappings. Used by both `SessionFactory` and `CreateAndSeedDatabase`.
+#### DbConfig (`Database/DbConfig.cs`)
+Fluent NHibernate config connecting to SQL Server, PostgreSQL, or MySQL. Connection details and provider are loaded via `DbSettingsManager.Load()` from `dbconfig.json`.
+
+- `LongStringSqlType` — provider-aware property that returns `"nvarchar(max)"` for SQL Server, `"text"` for PostgreSQL, `"LONGTEXT"` for MySQL. Used by the Fluent maps via `CustomSqlType()` so SchemaExport generates the correct column width per provider.
+- `BuildFluentConfig()` — shared helper that builds the `FluentConfiguration` with explicit `Add<ApplicationInfoMap>()` and `Add<HelpInfoMap>()` mappings. Uses `MsSqlConfiguration.MsSql2012` for SQL Server, `PostgreSQLConfiguration.PostgreSQL82` for PostgreSQL, and `MySQLConfiguration.Standard` for MySQL. Used by both `SessionFactory` and `CreateAndSeedDatabase`.
 - `CheckConnection()` — tests if the configured database is reachable
-- `CreateAndSeedDatabase(server, name, userId, password, out errorMessage)` — creates the database, then uses `SchemaExport` from the Fluent NHibernate mappings to create the tables (no raw SQL DDL). Seeds `ApplicationInfo` with default app data and `HelpInfo` from `HelpTopics.xml`. Builds its own connection strings from the method parameters (not `_settings`). Updates `_settings` with all four connection details and saves to `dbconfig.json`. Resets `_sessionFactory` so subsequent calls use the new connection. Error message includes inner exception details.
+- `CreateAndSeedDatabase(provider, server, name, userId, password, out errorMessage)` — creates the database (provider-specific), then uses `SchemaExport` from the Fluent NHibernate mappings to create the tables (drop-then-create to ensure fresh schema with correct column types). Seeds `ApplicationInfo` with default app data and `HelpInfo` from `HelpTopics.xml`. Updates `_settings` with all connection details including provider and saves to `dbconfig.json`. Resets `_sessionFactory` so subsequent calls use the new connection. Error message includes inner exception details.
 - `CurrentDatabaseName` — exposes the active database name for display on the splash screen
 - `CurrentServer` — exposes the active server for display on the splash screen
 - `CurrentUserId` — exposes the active user ID for display on the splash screen
+- `Provider` — exposes the active `DatabaseProvider` enum (SqlServer, PostgreSQL, or MySql)
 - `GetApplicationInfo()` — queries the single ApplicationInfo row
 - `GetHelpTopics()` — returns a list of `HelpTopic` records for the HelpWindow
-- `SyncHelpTopics()` — truncates HelpInfo and re-seeds from HelpTopics.xml on every launch (XML is the source of truth)
+- `SyncHelpTopics()` — truncates HelpInfo and re-seeds from HelpTopics.xml on every launch (XML is the source of truth). Uses provider-specific SQL for TRUNCATE/INSERT.
 
 #### DbSettings (`Database/DbSettings.cs`)
-`DbSettings` POCO with Server, DatabaseName, UserId, Password properties. `DbSettingsManager` reads/writes `dbconfig.json` from `%LOCALAPPDATA%/WinformsVibes/` using `System.Text.Json`. Migrates from old app-directory location on first run. If the file is missing, returns a `DbSettings` with defaults (`localhost`/`winformsvibes`/`sa`/`password`).
+`DbSettings` POCO with Provider (enum `DatabaseProvider`), Server, DatabaseName, UserId, Password properties. All fields default to empty/null — no hardcoded credentials. `DbSettingsManager` reads/writes `dbconfig.json` from `%LOCALAPPDATA%/WinformsVibes/` (Debug) or `%LOCALAPPDATA%/WinformsVibes-Release/` (Release) using `System.Text.Json`. Debug builds migrate from old app-directory location on first run. Release builds never migrate from dev directories — they use a separate AppData path to prevent credential leakage.
 
-#### Config File (`dbconfig.json`)
-Created automatically in `%LOCALAPPDATA%/WinformsVibes/` when the user creates a database via the setup dialog. This location ensures the app can write config even when installed to Program Files. On first run after update, the config is migrated from the old app-directory location if found. Deleting this file triggers the setup dialog on next launch.
+#### Config File (`dbconfig.{Debug,Release}.json`)
+Created automatically in `%LOCALAPPDATA%/WinformsVibes/` when the user creates a database via the setup dialog. The config filename is scoped by build configuration (e.g., `dbconfig.Debug.json`, `dbconfig.Release.json`) so debug and release builds maintain separate database connections. On first run after an update that introduces scoping, the legacy `dbconfig.json` is migrated to the appropriate scoped name. Deleting the scoped config file triggers the setup dialog on next launch for that build configuration.
 
 #### Entities & Mappings
-- `ApplicationInfo` (`Models/ApplicationInfo.cs`) — mapped by `ApplicationInfoMap` (`Maps/ApplicationInfoMap.cs`). `Dependencies` column uses `CustomSqlType("nvarchar(max)")`.
-- `HelpInfo` (`Models/HelpInfo.cs`) — mapped by `HelpInfoMap` (`Maps/HelpInfoMap.cs`). `Content` column uses `CustomSqlType("nvarchar(max)")`.
+- `ApplicationInfo` (`Models/ApplicationInfo.cs`) — mapped by `ApplicationInfoMap` (`Maps/ApplicationInfoMap.cs`). `Dependencies` column uses `CustomSqlType(DbConfig.LongStringSqlType)` for provider-aware long strings.
+- `HelpInfo` (`Models/HelpInfo.cs`) — mapped by `HelpInfoMap` (`Maps/HelpInfoMap.cs`). `Content` column uses `CustomSqlType(DbConfig.LongStringSqlType)` for provider-aware long strings.
 - Proxy validation and lazy loading are disabled
 - `ApplicationInfo.DatabaseName`, `Server`, and `UserId` are **not mapped** to the database — set at runtime for display purposes
+- PostgreSQL uses quoted identifiers (e.g., `"ApplicationInfo"`, `"HelpInfo"`), SQL Server uses unquoted names, MySQL uses backtick-quoted identifiers
 
 #### Help Topics (`HelpTopics.xml`)
 XML file (copied to output on build) that defines the help topics seeded into the `HelpInfo` table. Each `<Topic>` element has `Category` and `Name` attributes and text content. Edit this file to change the help content. On every launch, `SyncHelpTopics()` truncates HelpInfo and re-seeds from the XML — the XML is the single source of truth.
@@ -140,6 +156,8 @@ ChatWindow, AIHelpWindow, and AIMapWindow use a static `_instance` field with `G
 - `Microsoft.Web.WebView2` v1.0.3967.48 — Chromium-based web rendering inside WinForms
 - `ReaLTaiizor` v3.8.1.8 — Material Design controls for WinForms
 - `System.Data.SqlClient` v4.8.6 — SQL Server data access
+- `Npgsql` v6.0.11 — PostgreSQL data access
+- `MySqlConnector` v2.3.5 — MySQL data access
 
 ## Known Issues
 
@@ -150,4 +168,4 @@ ChatWindow, AIHelpWindow, and AIMapWindow use a static `_instance` field with `G
 
 ## Configuration
 
-The active database connection is stored in `dbconfig.json` under `%LOCALAPPDATA%/WinformsVibes/`. Edit `DatabaseName` to switch databases, or delete the file to trigger the setup dialog on next launch.
+The active database connection is stored in `dbconfig.{Debug,Release}.json` under `%LOCALAPPDATA%/WinformsVibes/` (Debug) or `%LOCALAPPDATA%/WinformsVibes-Release/` (Release). The `Provider` field determines which database type is used (`SqlServer`, `PostgreSQL`, or `MySql`). Release builds use a separate AppData directory to prevent dev credentials from leaking. Edit `DatabaseName` to switch databases, or delete the file to trigger the setup dialog on next launch.
